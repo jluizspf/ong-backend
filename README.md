@@ -1,4 +1,4 @@
-# 🏫 Sistema de Gestão da ONG
+8# 🏫 Sistema de Gestão da ONG
 
 Sistema completo para gerenciar alunos, cursos, professores e colaboradores de uma ONG educacional.
 
@@ -281,11 +281,6 @@ O banco de dados segue exatamente o ERD fornecido com:
 
 Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
 
-## 📞 Suporte
-
-Para suporte, entre em contato através de:
-- Email: seu-email@exemplo.com
-- GitHub Issues: [Link para issues]
 
 ## 🎯 Roadmap
 

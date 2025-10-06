@@ -1,16 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const Colaborador = require('../models/Colaborador');
+const { serializeBigInt } = require('./utils');
 
 // GET /api/colaboradores - Buscar todos os colaboradores
 router.get('/', async (req, res) => {
     try {
         const colaboradores = await Colaborador.getAll();
-        res.json({
+        res.json(serializeBigInt({
             success: true,
             data: colaboradores,
             count: colaboradores.length
-        });
+        }));
     } catch (error) {
         console.error('Erro ao buscar colaboradores:', error);
         res.status(500).json({

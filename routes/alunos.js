@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Aluno = require('../models/Aluno');
+const {serializeBigInt} = require("./utils");
 
 // GET /api/alunos - Buscar todos os alunos
 router.get('/', async (req, res) => {
@@ -34,10 +35,10 @@ router.get('/:id', async (req, res) => {
             });
         }
         
-        res.json({
+        res.json(serializeBigInt({
             success: true,
             data: aluno
-        });
+        }));
     } catch (error) {
         console.error('Erro ao buscar aluno:', error);
         res.status(500).json({
@@ -63,11 +64,11 @@ router.post('/', async (req, res) => {
         
         const alunoId = await Aluno.create(alunoData);
         
-        res.status(201).json({
+        res.status(201).json(serializeBigInt({
             success: true,
             message: 'Aluno criado com sucesso',
             data: { id: alunoId }
-        });
+        }));
     } catch (error) {
         console.error('Erro ao criar aluno:', error);
         res.status(500).json({
@@ -93,10 +94,10 @@ router.put('/:id', async (req, res) => {
             });
         }
         
-        res.json({
+        res.json(serializeBigInt({
             success: true,
             message: 'Aluno atualizado com sucesso'
-        });
+        }));
     } catch (error) {
         console.error('Erro ao atualizar aluno:', error);
         res.status(500).json({
@@ -121,10 +122,10 @@ router.delete('/:id', async (req, res) => {
             });
         }
         
-        res.json({
+        res.json(serializeBigInt({
             success: true,
             message: 'Aluno deletado com sucesso'
-        });
+        }));
     } catch (error) {
         console.error('Erro ao deletar aluno:', error);
         res.status(500).json({
@@ -141,11 +142,11 @@ router.get('/curso/:cursoId', async (req, res) => {
         const { cursoId } = req.params;
         const alunos = await Aluno.getByCurso(cursoId);
         
-        res.json({
+        res.json(serializeBigInt({
             success: true,
             data: alunos,
             count: alunos.length
-        });
+        }));
     } catch (error) {
         console.error('Erro ao buscar alunos do curso:', error);
         res.status(500).json({

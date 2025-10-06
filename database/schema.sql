@@ -36,7 +36,7 @@ CREATE TABLE Curso (
     Local VARCHAR(255),
     Prof_Responsavel VARCHAR(255),
     Horario VARCHAR(100),
-    Data_Registro DATE DEFAULT CURRENT_DATE,
+    Data_Registro DATE,
     Verificado BOOLEAN DEFAULT FALSE,
     Colaborador_Resp VARCHAR(255)
 );
@@ -71,7 +71,7 @@ CREATE TABLE Inscricao (
     ID_Inscricao INT AUTO_INCREMENT PRIMARY KEY,
     ID_Aluno INT,
     ID_Curso INT,
-    Data_Inscricao DATE DEFAULT CURRENT_DATE,
+    Data_Inscricao DATE,
     Status ENUM('Ativa', 'Cancelada', 'Concluida') DEFAULT 'Ativa',
     FOREIGN KEY (ID_Aluno) REFERENCES Aluno(ID_Aluno) ON DELETE CASCADE,
     FOREIGN KEY (ID_Curso) REFERENCES Curso(ID_Curso) ON DELETE CASCADE,
@@ -83,7 +83,7 @@ CREATE TABLE Verificacao_Curso (
     ID_Verificacao INT AUTO_INCREMENT PRIMARY KEY,
     ID_Colab INT,
     ID_Curso INT,
-    Data_Verificacao DATE DEFAULT CURRENT_DATE,
+    Data_Verificacao DATE,
     Status ENUM('Aprovado', 'Rejeitado', 'Pendente') DEFAULT 'Pendente',
     Observacoes TEXT,
     FOREIGN KEY (ID_Colab) REFERENCES Colaborador(ID_Colab) ON DELETE CASCADE,
@@ -107,7 +107,7 @@ CREATE TABLE Inscricao_Professor (
     ID_Inscricao_Prof INT AUTO_INCREMENT PRIMARY KEY,
     ID_Colab INT,
     ID_Prof INT,
-    Data_Inscricao DATE DEFAULT CURRENT_DATE,
+    Data_Inscricao DATE,
     Status ENUM('Ativa', 'Cancelada', 'Concluida') DEFAULT 'Ativa',
     FOREIGN KEY (ID_Colab) REFERENCES Colaborador(ID_Colab) ON DELETE CASCADE,
     FOREIGN KEY (ID_Prof) REFERENCES Professor(ID_Prof) ON DELETE CASCADE

@@ -1,16 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const Professor = require('../models/Professor');
+const { serializeBigInt } = require('./utils');
+
+
 
 // GET /api/professores - Buscar todos os professores
 router.get('/', async (req, res) => {
     try {
         const professores = await Professor.getAll();
-        res.json({
+        res.json(serializeBigInt({
             success: true,
             data: professores,
             count: professores.length
-        });
+        }));
     } catch (error) {
         console.error('Erro ao buscar professores:', error);
         res.status(500).json({

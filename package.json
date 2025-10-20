@@ -8,15 +8,21 @@
     "dev": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["ong", "nodejs", "mariadb", "api"],
+  "keywords": [
+    "ong",
+    "nodejs",
+    "mariadb",
+    "api"
+  ],
   "author": "Seu Nome",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
-    "mariadb": "^3.1.0",
+    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "body-parser": "^1.20.2"
+    "express": "^4.18.2",
+    "mariadb": "^3.1.0",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

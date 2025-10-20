@@ -3,7 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config();
 
-const { testConnection } = require('./config/database');
+const { testConnection, initializeDatabase } = require('./config/database-sqlite');
 
 // Importar rotas
 const alunosRoutes = require('./routes/alunos');
@@ -83,10 +83,18 @@ app.listen(PORT, async () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📊 Ambiente: ${process.env.NODE_ENV || 'development'}`);
     
+    // Inicializar banco de dados SQLite
+    const dbInitialized = await initializeDatabase();
+    if (dbInitialized) {
+        console.log('✅ Banco de dados SQLite inicializado com sucesso!');
+    } else {
+        console.log('⚠️  Aviso: Erro ao inicializar banco de dados');
+    }
+    
     // Testar conexão com banco
     const dbConnected = await testConnection();
     if (dbConnected) {
-        console.log('✅ Banco de dados conectado com sucesso!');
+        console.log('✅ Conexão com banco de dados estabelecida!');
     } else {
         console.log('⚠️  Aviso: Banco de dados não conectado');
     }

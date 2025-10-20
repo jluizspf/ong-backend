@@ -1,11 +1,11 @@
-const { executeQuery } = require('../config/database');
+const { executeQuery } = require('../config/database-sqlite');
 
 class Aluno {
     // Buscar todos os alunos
     static async getAll() {
         const sql = `
             SELECT a.*, 
-                   GROUP_CONCAT(e.Nivel SEPARATOR ', ') as Escolaridades
+                   GROUP_CONCAT(e.Nivel, ', ') as Escolaridades
             FROM Aluno a
             LEFT JOIN Escolaridade e ON a.ID_Aluno = e.ID_Aluno
             GROUP BY a.ID_Aluno
@@ -18,7 +18,7 @@ class Aluno {
     static async getById(id) {
         const sql = `
             SELECT a.*, 
-                   GROUP_CONCAT(e.Nivel SEPARATOR ', ') as Escolaridades
+                   GROUP_CONCAT(e.Nivel, ', ') as Escolaridades
             FROM Aluno a
             LEFT JOIN Escolaridade e ON a.ID_Aluno = e.ID_Aluno
             WHERE a.ID_Aluno = ?

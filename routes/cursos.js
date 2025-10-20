@@ -1,16 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const Curso = require('../models/Curso');
+const { serializeBigInt } = require('./utils');
 
 // GET /api/cursos - Buscar todos os cursos
 router.get('/', async (req, res) => {
     try {
         const cursos = await Curso.getAll();
-        res.json({
+        res.json(serializeBigInt({
             success: true,
             data: cursos,
             count: cursos.length
-        });
+        }));
     } catch (error) {
         console.error('Erro ao buscar cursos:', error);
         res.status(500).json({

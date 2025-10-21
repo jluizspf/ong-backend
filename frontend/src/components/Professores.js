@@ -21,10 +21,12 @@ function Professores() {
     fetchProfessores();
   }, []);
 
+  const apiUrl = process.env.REACT_APP_API_URL;
+  
   const fetchProfessores = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/professores');
+      const response = await axios.get(`${apiUrl/api/professores`);
       setProfessores(response.data.data || []);
     } catch (err) {
       setError('Erro ao carregar professores');
@@ -46,9 +48,9 @@ function Professores() {
     e.preventDefault();
     try {
       if (editingProfessor) {
-        await axios.put(`/professores/${editingProfessor.ID_Prof}`, formData);
+        await axios.put(`${apiUrl}/api/professores/${editingProfessor.ID_Prof}`, formData);
       } else {
-        await axios.post('/professores', formData);
+        await axios.post(`${apiUrl}/api/professores`, formData);
       }
       
       setShowForm(false);
@@ -84,7 +86,7 @@ function Professores() {
   const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja deletar este professor?')) {
       try {
-        await axios.delete(`/professores/${id}`);
+        await axios.delete(`${apiUrl}/api/professores/${id}`);
         fetchProfessores();
       } catch (err) {
         setError('Erro ao deletar professor');

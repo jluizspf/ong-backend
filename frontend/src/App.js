@@ -10,7 +10,7 @@ import Colaboradores from './components/Colaboradores';
 import Dashboard from './components/Dashboard';
 
 // Configuração do axios
-axios.defaults.baseURL = 'http://localhost:3000/api';
+
 
 function Navigation() {
   const location = useLocation();

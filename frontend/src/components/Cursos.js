@@ -26,7 +26,7 @@ function Cursos() {
   const fetchCursos = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('${process.env.REACT_APP_API_URL}/api/cursos');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/cursos`);
       setCursos(response.data.data || []);
     } catch (err) {
       setError('Erro ao carregar cursos');
@@ -50,7 +50,7 @@ function Cursos() {
       if (editingCurso) {
         await axios.put(`${apiUrl}/api/cursos/${editingCurso.ID_Curso}`, formData);
       } else {
-        await axios.post('${apiUrl}/api/cursos', formData);
+        await axios.post(`${apiUrl}/api/cursos`, formData);
       }
       
       setShowForm(false);

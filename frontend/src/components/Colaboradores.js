@@ -24,7 +24,7 @@ function Colaboradores() {
   const fetchColaboradores = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/colaboradores');
+      const response = await axios.get('${process.env.REACT_APP_API_URL}/api/colaboradores');
       setColaboradores(response.data.data || []);
     } catch (err) {
       setError('Erro ao carregar colaboradores');
@@ -46,9 +46,9 @@ function Colaboradores() {
     e.preventDefault();
     try {
       if (editingColaborador) {
-        await axios.put(`/colaboradores/${editingColaborador.ID_Colab}`, formData);
+        await axios.put(`${apiUrl}/api/colaboradores/${editingColaborador.ID_Colab}`, formData);
       } else {
-        await axios.post('/colaboradores', formData);
+        await axios.post('${apiUrl}/api/colaboradores', formData);
       }
       
       setShowForm(false);
@@ -84,7 +84,7 @@ function Colaboradores() {
   const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja deletar este colaborador?')) {
       try {
-        await axios.delete(`/colaboradores/${id}`);
+        await axios.delete(`${apiUrl}/api/colaboradores/${id}`);
         fetchColaboradores();
       } catch (err) {
         setError('Erro ao deletar colaborador');

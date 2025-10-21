@@ -7,7 +7,8 @@ function Cursos() {
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingCurso, setEditingCurso] = useState(null);
-
+  
+  const apiUrl = process.env.REACT_APP_API_URL;
   const [formData, setFormData] = useState({
     Nome: '',
     Qtd_Vagas: '',
@@ -25,7 +26,7 @@ function Cursos() {
   const fetchCursos = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/cursos');
+      const response = await axios.get('${process.env.REACT_APP_API_URL}/api/cursos');
       setCursos(response.data.data || []);
     } catch (err) {
       setError('Erro ao carregar cursos');
@@ -42,14 +43,14 @@ function Cursos() {
       [name]: value
     }));
   };
-
+  const apiUrl = process.env.REACT_APP_API_URL;
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (editingCurso) {
-        await axios.put(`/cursos/${editingCurso.ID_Curso}`, formData);
+        await axios.put(`${apiUrl}/api/cursos/${editingCurso.ID_Curso}`, formData);
       } else {
-        await axios.post('/cursos', formData);
+        await axios.post('${apiUrl}/api/cursos', formData);
       }
       
       setShowForm(false);
@@ -83,11 +84,11 @@ function Cursos() {
     });
     setShowForm(true);
   };
-
+  
   const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja deletar este curso?')) {
       try {
-        await axios.delete(`/cursos/${id}`);
+        await axios.delete(`${apiUrl}/api/cursos/${id}`);
         fetchCursos();
       } catch (err) {
         setError('Erro ao deletar curso');
@@ -99,7 +100,7 @@ function Cursos() {
   const handleVerificar = async (id) => {
     try {
       // Para simplificar, vamos usar o colaborador ID 1
-      await axios.post(`/cursos/${id}/verificar`, { colaboradorId: 1 });
+      await axios.post(`${apiUrl}/api/cursos/${id}/verificar`, { colaboradorId: 1 });
       fetchCursos();
     } catch (err) {
       setError('Erro ao verificar curso');

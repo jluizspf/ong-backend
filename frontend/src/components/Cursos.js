@@ -43,7 +43,7 @@ function Cursos() {
       [name]: value
     }));
   };
-  const apiUrl = process.env.REACT_APP_API_URL;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {

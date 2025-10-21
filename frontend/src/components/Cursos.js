@@ -26,7 +26,7 @@ function Cursos() {
   const fetchCursos = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/cursos`);
+      const response = await axios.get(`${apiUrl}/api/cursos`);
       setCursos(response.data.data || []);
     } catch (err) {
       setError('Erro ao carregar cursos');

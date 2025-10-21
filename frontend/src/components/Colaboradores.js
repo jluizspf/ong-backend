@@ -7,7 +7,8 @@ function Colaboradores() {
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingColaborador, setEditingColaborador] = useState(null);
-
+  
+  const apiUrl = process.env.REACT_APP_API_URL;
   const [formData, setFormData] = useState({
     Nome: '',
     CPF: '',

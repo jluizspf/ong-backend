@@ -25,7 +25,7 @@ function Colaboradores() {
   const fetchColaboradores = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${ApiUrl}/api/colaboradores`);
+      const response = await axios.get(`${apiUrl}/api/colaboradores`);
       setColaboradores(response.data.data || []);
     } catch (err) {
       setError('Erro ao carregar colaboradores');

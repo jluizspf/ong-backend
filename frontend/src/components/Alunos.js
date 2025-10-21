@@ -94,7 +94,7 @@ function Alunos() {
   const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja deletar este aluno?')) {
       try {
-        await axios.delete(`/${apiUrl}/api/alunos/${id}`);
+        await axios.delete(`${apiUrl}/api/alunos/${id}`);
         fetchAlunos();
       } catch (err) {
         setError('Erro ao deletar aluno');

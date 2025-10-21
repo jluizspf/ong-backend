@@ -15,14 +15,15 @@ function Dashboard() {
     fetchStats();
   }, []);
 
+  const apiUrl = process.env.REACT_APP_API_URL;
   const fetchStats = async () => {
     try {
       setLoading(true);
       const [alunosRes, cursosRes, professoresRes, colaboradoresRes] = await Promise.all([
-        axios.get('/alunos'),
-        axios.get('/cursos'),
-        axios.get('/professores'),
-        axios.get('/colaboradores')
+        axios.get('${process.env.REACT_APP_API_URL}/api/alunos'),
+        axios.get('${process.env.REACT_APP_API_URL}/api/cursos'),
+        axios.get('${process.env.REACT_APP_API_URL}/api/professores'),
+        axios.get('${process.env.REACT_APP_API_URL}/api/colaboradores')
       ]);
 
       setStats({

@@ -27,7 +27,7 @@ function Alunos() {
   const fetchAlunos = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/alunos');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/alunos`);
       setAlunos(response.data.data || []);
     } catch (err) {
       setError('Erro ao carregar alunos');
@@ -49,9 +49,9 @@ function Alunos() {
     e.preventDefault();
     try {
       if (editingAluno) {
-        await axios.put(`/alunos/${editingAluno.ID_Aluno}`, formData);
+        await axios.put(`${apiUrl}/api/alunos/${editingAluno.ID_Aluno}`, formData);
       } else {
-        await axios.post('/alunos', formData);
+        await axios.post('${apiUrl}/api/alunos', formData);
       }
       
       setShowForm(false);
@@ -93,7 +93,7 @@ function Alunos() {
   const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja deletar este aluno?')) {
       try {
-        await axios.delete(`/alunos/${id}`);
+        await axios.delete(`/${process.env.REACT_APP_API_URL}/api/alunos/${id}`);
         fetchAlunos();
       } catch (err) {
         setError('Erro ao deletar aluno');

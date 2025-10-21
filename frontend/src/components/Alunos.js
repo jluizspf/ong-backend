@@ -52,7 +52,7 @@ function Alunos() {
       if (editingAluno) {
         await axios.put(`${apiUrl}/api/alunos/${editingAluno.ID_Aluno}`, formData);
       } else {
-        await axios.post('${apiUrl}/api/alunos', formData);
+        await axios.post(`${apiUrl}/api/alunos`, formData);
       }
       
       setShowForm(false);

@@ -8,6 +8,7 @@ function Alunos() {
   const [showForm, setShowForm] = useState(false);
   const [editingAluno, setEditingAluno] = useState(null);
 
+  const apiUrl = process.env.REACT_APP_API_URL;
   const [formData, setFormData] = useState({
     Nome: '',
     CPF: '',

@@ -20,10 +20,10 @@ function Dashboard() {
     try {
       setLoading(true);
       const [alunosRes, cursosRes, professoresRes, colaboradoresRes] = await Promise.all([
-        axios.get(`${process.env.REACT_APP_API_URL}/api/alunos`),
-        axios.get(`${process.env.REACT_APP_API_URL}/api/cursos`),
-        axios.get(`${process.env.REACT_APP_API_URL}/api/professores`),
-        axios.get(`${process.env.REACT_APP_API_URL}/api/colaboradores`)
+        axios.get(`${apiUrl}/api/alunos`),
+        axios.get(`${apiUrl}/api/cursos`),
+        axios.get(`${apiUrl}/api/professores`),
+        axios.get(`${apiUrl}/api/colaboradores`)
       ]);
 
       setStats({

@@ -26,7 +26,7 @@ function Professores() {
   const fetchProfessores = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${apiUrl/api/professores`);
+      const response = await axios.get(`${apiUrl}/api/professores`);
       setProfessores(response.data.data || []);
     } catch (err) {
       setError('Erro ao carregar professores');

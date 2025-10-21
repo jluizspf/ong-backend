@@ -25,7 +25,7 @@ function Colaboradores() {
   const fetchColaboradores = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('${process.env.REACT_APP_API_URL}/api/colaboradores');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/colaboradores`);
       setColaboradores(response.data.data || []);
     } catch (err) {
       setError('Erro ao carregar colaboradores');
@@ -49,7 +49,7 @@ function Colaboradores() {
       if (editingColaborador) {
         await axios.put(`${apiUrl}/api/colaboradores/${editingColaborador.ID_Colab}`, formData);
       } else {
-        await axios.post('${apiUrl}/api/colaboradores', formData);
+        await axios.post(`${apiUrl}/api/colaboradores`, formData);
       }
       
       setShowForm(false);

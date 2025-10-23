@@ -8,7 +8,7 @@ function Colaboradores() {
   const [showForm, setShowForm] = useState(false);
   const [editingColaborador, setEditingColaborador] = useState(null);
   
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrl = "http://34.171.166.185:3000";
   const [formData, setFormData] = useState({
     Nome: '',
     CPF: '',

@@ -9,6 +9,8 @@ import Professores from './components/Professores';
 import Colaboradores from './components/Colaboradores';
 import Dashboard from './components/Dashboard';
 
+const apiUrl = process.env.REACT_APP_API_URL;
+
 // Configuração do axios
 
 
@@ -52,7 +54,7 @@ function App() {
 
   const checkApiHealth = async () => {
     try {
-      const response = await axios.get('/health');
+      const response = await axios.get(`${apiUrl}/health`);
       setApiStatus('online');
       setDbStatus(response.data.database);
     } catch (error) {

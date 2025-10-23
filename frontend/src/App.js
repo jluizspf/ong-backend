@@ -9,7 +9,7 @@ import Professores from './components/Professores';
 import Colaboradores from './components/Colaboradores';
 import Dashboard from './components/Dashboard';
 
-const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = "http://34.171.166.185:3000";
 
 // Configuração do axios
 

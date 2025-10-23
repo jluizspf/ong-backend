@@ -21,7 +21,7 @@ function Professores() {
     fetchProfessores();
   }, []);
 
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrl = "http://34.171.166.185:3000";
   
   const fetchProfessores = async () => {
     try {

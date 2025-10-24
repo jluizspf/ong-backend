@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const apiUrl = "https://cidemoradia.duckdns.org";
+
 function Professores() {
   const [professores, setProfessores] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +24,7 @@ function Professores() {
   }, []);
 
 
-  const apiUrl = "https://cidemoradia.duckdns.org";
+
 
   
   const fetchProfessores = async () => {

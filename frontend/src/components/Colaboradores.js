@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const apiUrl = "https://cidemoradia.duckdns.org";
+
 function Colaboradores() {
   const [colaboradores, setColaboradores] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,7 +11,7 @@ function Colaboradores() {
   const [editingColaborador, setEditingColaborador] = useState(null);
   
 
-  const apiUrl = "https://cidemoradia.duckdns.org";
+
 
   const [formData, setFormData] = useState({
     Nome: '',

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const apiUrl = "https://cidemoradia.duckdns.org";
+
 function Dashboard() {
   const [stats, setStats] = useState({
     alunos: 0,
@@ -16,7 +18,7 @@ function Dashboard() {
   }, []);
 
 
-  const apiUrl = "https://cidemoradia.duckdns.org";
+
 
   const fetchStats = async () => {
     try {

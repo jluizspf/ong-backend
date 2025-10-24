@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const apiUrl = "https://cidemoradia.duckdns.org";
+
 function Cursos() {
   const [cursos, setCursos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,7 +11,7 @@ function Cursos() {
   const [editingCurso, setEditingCurso] = useState(null);
   
 
-  const apiUrl = "https://cidemoradia.duckdns.org";
+
 
 
   const [formData, setFormData] = useState({

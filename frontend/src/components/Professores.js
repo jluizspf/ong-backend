@@ -21,7 +21,7 @@ function Professores() {
     fetchProfessores();
   }, []);
 
-<<<<<<< HEAD
+
   const apiUrl = "https://cidemoradia.duckdns.org";
 
   

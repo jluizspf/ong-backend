@@ -8,7 +8,7 @@ function Cursos() {
   const [showForm, setShowForm] = useState(false);
   const [editingCurso, setEditingCurso] = useState(null);
   
-<<<<<<< HEAD
+
   const apiUrl = "https://cidemoradia.duckdns.org";
 
 

@@ -8,7 +8,7 @@ function Colaboradores() {
   const [showForm, setShowForm] = useState(false);
   const [editingColaborador, setEditingColaborador] = useState(null);
   
-<<<<<<< HEAD
+
   const apiUrl = "https://cidemoradia.duckdns.org";
 
   const [formData, setFormData] = useState({

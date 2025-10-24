@@ -8,7 +8,7 @@ function Alunos() {
   const [showForm, setShowForm] = useState(false);
   const [editingAluno, setEditingAluno] = useState(null);
 
-  const apiUrl = "http://34.171.166.185:3000";
+  const apiUrl = "https://cidemoradia.duckdns.org";
   const [formData, setFormData] = useState({
     Nome: '',
     CPF: '',

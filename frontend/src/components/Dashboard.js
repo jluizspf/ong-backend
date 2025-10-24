@@ -15,7 +15,7 @@ function Dashboard() {
     fetchStats();
   }, []);
 
-  const apiUrl = "http://34.171.166.185:3000";
+  const apiUrl = "https://cidemoradia.duckdns.org";
   const fetchStats = async () => {
     try {
       setLoading(true);

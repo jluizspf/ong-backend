@@ -21,7 +21,7 @@ function Professores() {
     fetchProfessores();
   }, []);
 
-  const apiUrl = "http://34.171.166.185:3000";
+  const apiUrl = "https://cidemoradia.duckdns.org";
   
   const fetchProfessores = async () => {
     try {

@@ -9,7 +9,7 @@ import Professores from './components/Professores';
 import Colaboradores from './components/Colaboradores';
 import Dashboard from './components/Dashboard';
 
-const apiUrl = "http://34.171.166.185:3000";
+const apiUrl = "https://cidemoradia.duckdns.org";
 
 // Configuração do axios
 

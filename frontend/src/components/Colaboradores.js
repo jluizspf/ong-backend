@@ -10,9 +10,7 @@ function Colaboradores() {
   
 <<<<<<< HEAD
   const apiUrl = "https://cidemoradia.duckdns.org";
-=======
-  const apiUrl = "http://34.171.166.185:3000";
->>>>>>> 05609e25537869a9dd8209d85c877337eaeb0696
+
   const [formData, setFormData] = useState({
     Nome: '',
     CPF: '',

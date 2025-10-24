@@ -11,7 +11,7 @@ function Cursos() {
 <<<<<<< HEAD
   const apiUrl = "https://cidemoradia.duckdns.org";
 
->>>>>>> 05609e25537869a9dd8209d85c877337eaeb0696
+
   const [formData, setFormData] = useState({
     Nome: '',
     Qtd_Vagas: '',

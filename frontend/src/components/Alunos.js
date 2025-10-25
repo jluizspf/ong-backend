@@ -107,6 +107,22 @@ function Alunos() {
     }
   };
 
+  const handleDelete = async (id) => {
+    // ... (código existente do handleDelete)
+  };
+
+// ADICIONE ESTA FUNÇÃO
+  const handleVerificar = async (id) => {
+    try {
+      // Vamos usar o colaborador ID 1 como no seu exemplo
+      await axios.post(`/api/alunos/${id}/verificar`, { colaboradorId: 1 });
+      fetchAlunos(); // Atualiza a lista
+    } catch (err) {
+      setError('Erro ao verificar aluno');
+      console.error('Erro ao verificar aluno:', err);
+    }
+  };
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -297,15 +313,15 @@ function Alunos() {
         <div className="table-responsive">
           <table className="table">
             <thead>
-              <tr>
-                <th>Nome</th>
-                <th>CPF</th>
-                <th>Email</th>
-                <th>Telefone</th>
-                <th>Renda Familiar</th>
-                <th>Verificado</th>
-                <th>Ações</th>
-              </tr>
+            <tr>
+              <th>Nome</th>
+              <th>CPF</th>
+              <th>Email</th>
+              <th>Telefone</th>
+              <th>Renda Familiar</th>
+              <th>Verificado</th>
+              <th>Ações</th>
+            </tr>
             </thead>
             <tbody>
               {alunos.map(aluno => (
@@ -336,6 +352,18 @@ function Alunos() {
                       >
                         🗑️
                       </button>
+
+                      {/* ADICIONE ESTE BLOCO DO BOTÃO */}
+                      {!aluno.Verificado && (
+                          <button
+                              className="btn btn-success"
+                              onClick={() => handleVerificar(aluno.ID_Aluno)}
+                              style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                              title="Verificar Aluno"
+                          >
+                            ✔️
+                          </button>
+                      )}
                     </div>
                   </td>
                 </tr>

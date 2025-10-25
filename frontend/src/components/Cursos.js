@@ -105,7 +105,7 @@ function Cursos() {
   const handleVerificar = async (id) => {
     try {
       // Para simplificar, vamos usar o colaborador ID 1
-      await axios.post(`${apiUrl}/api/cursos/${id}/verificar`, { colaboradorId: 1 });
+      await axios.post(`/api/cursos/${id}/verificar`, { colaboradorId: 1 });
       fetchCursos();
     } catch (err) {
       setError('Erro ao verificar curso');

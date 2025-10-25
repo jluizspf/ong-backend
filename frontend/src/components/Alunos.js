@@ -107,9 +107,6 @@ function Alunos() {
     }
   };
 
-  const handleDelete = async (id) => {
-    // ... (código existente do handleDelete)
-  };
 
 // ADICIONE ESTA FUNÇÃO
   const handleVerificar = async (id) => {

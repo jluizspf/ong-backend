@@ -11,7 +11,7 @@ import Professores from './components/Professores';
 import Colaboradores from './components/Colaboradores';
 import Dashboard from './components/Dashboard';
 
-const apiUrl = "https://cidemoradia.duckdns.org";
+
 
 // Configuração do axios
 
@@ -56,7 +56,7 @@ function App() {
 
   const checkApiHealth = async () => {
     try {
-      const response = await axios.get(`${apiUrl}/health`);
+      const response = await axios.get(`/health`);
       setApiStatus('online');
       setDbStatus(response.data.database);
     } catch (error) {

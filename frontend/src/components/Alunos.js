@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const apiUrl = "https://cidemoradia.duckdns.org";
+
 
 function Alunos() {
   const [alunos, setAlunos] = useState([]);
@@ -32,7 +32,7 @@ function Alunos() {
   const fetchAlunos = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${apiUrl}/api/alunos`);
+      const response = await axios.get(`/api/alunos`);
       setAlunos(response.data.data || []);
     } catch (err) {
       setError('Erro ao carregar alunos');
@@ -54,9 +54,9 @@ function Alunos() {
     e.preventDefault();
     try {
       if (editingAluno) {
-        await axios.put(`${apiUrl}/api/alunos/${editingAluno.ID_Aluno}`, formData);
+        await axios.put(`/api/alunos/${editingAluno.ID_Aluno}`, formData);
       } else {
-        await axios.post(`${apiUrl}/api/alunos`, formData);
+        await axios.post(`/api/alunos`, formData);
       }
       
       setShowForm(false);
@@ -98,7 +98,7 @@ function Alunos() {
   const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja deletar este aluno?')) {
       try {
-        await axios.delete(`${apiUrl}/api/alunos/${id}`);
+        await axios.delete(`/api/alunos/${id}`);
         fetchAlunos();
       } catch (err) {
         setError('Erro ao deletar aluno');

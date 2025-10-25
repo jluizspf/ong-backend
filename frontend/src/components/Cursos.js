@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const apiUrl = "https://cidemoradia.duckdns.org";
+
 
 function Cursos() {
   const [cursos, setCursos] = useState([]);
@@ -31,7 +31,7 @@ function Cursos() {
   const fetchCursos = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${apiUrl}/api/cursos`);
+      const response = await axios.get(`/api/cursos`);
       setCursos(response.data.data || []);
     } catch (err) {
       setError('Erro ao carregar cursos');
@@ -53,9 +53,9 @@ function Cursos() {
     e.preventDefault();
     try {
       if (editingCurso) {
-        await axios.put(`${apiUrl}/api/cursos/${editingCurso.ID_Curso}`, formData);
+        await axios.put(`/api/cursos/${editingCurso.ID_Curso}`, formData);
       } else {
-        await axios.post(`${apiUrl}/api/cursos`, formData);
+        await axios.post(`/api/cursos`, formData);
       }
       
       setShowForm(false);
@@ -93,7 +93,7 @@ function Cursos() {
   const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja deletar este curso?')) {
       try {
-        await axios.delete(`${apiUrl}/api/cursos/${id}`);
+        await axios.delete(`/api/cursos/${id}`);
         fetchCursos();
       } catch (err) {
         setError('Erro ao deletar curso');

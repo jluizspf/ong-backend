@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const apiUrl = "https://cidemoradia.duckdns.org";
+
 
 function Colaboradores() {
   const [colaboradores, setColaboradores] = useState([]);
@@ -29,7 +29,7 @@ function Colaboradores() {
   const fetchColaboradores = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${apiUrl}/api/colaboradores`);
+      const response = await axios.get(`/api/colaboradores`);
       setColaboradores(response.data.data || []);
     } catch (err) {
       setError('Erro ao carregar colaboradores');
@@ -51,9 +51,9 @@ function Colaboradores() {
     e.preventDefault();
     try {
       if (editingColaborador) {
-        await axios.put(`${apiUrl}/api/colaboradores/${editingColaborador.ID_Colab}`, formData);
+        await axios.put(`/api/colaboradores/${editingColaborador.ID_Colab}`, formData);
       } else {
-        await axios.post(`${apiUrl}/api/colaboradores`, formData);
+        await axios.post(`/api/colaboradores`, formData);
       }
       
       setShowForm(false);
@@ -89,7 +89,7 @@ function Colaboradores() {
   const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja deletar este colaborador?')) {
       try {
-        await axios.delete(`${apiUrl}/api/colaboradores/${id}`);
+        await axios.delete(`/api/colaboradores/${id}`);
         fetchColaboradores();
       } catch (err) {
         setError('Erro ao deletar colaborador');

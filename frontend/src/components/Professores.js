@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const apiUrl = "https://cidemoradia.duckdns.org";
+
 
 function Professores() {
   const [professores, setProfessores] = useState([]);
@@ -30,7 +30,7 @@ function Professores() {
   const fetchProfessores = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${apiUrl}/api/professores`);
+      const response = await axios.get(`/api/professores`);
       setProfessores(response.data.data || []);
     } catch (err) {
       setError('Erro ao carregar professores');
@@ -52,9 +52,9 @@ function Professores() {
     e.preventDefault();
     try {
       if (editingProfessor) {
-        await axios.put(`${apiUrl}/api/professores/${editingProfessor.ID_Prof}`, formData);
+        await axios.put(`/api/professores/${editingProfessor.ID_Prof}`, formData);
       } else {
-        await axios.post(`${apiUrl}/api/professores`, formData);
+        await axios.post(`/api/professores`, formData);
       }
       
       setShowForm(false);
@@ -90,7 +90,7 @@ function Professores() {
   const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja deletar este professor?')) {
       try {
-        await axios.delete(`${apiUrl}/api/professores/${id}`);
+        await axios.delete(`/api/professores/${id}`);
         fetchProfessores();
       } catch (err) {
         setError('Erro ao deletar professor');

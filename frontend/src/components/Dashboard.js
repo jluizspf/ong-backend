@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const apiUrl = "https://cidemoradia.duckdns.org";
+
 
 function Dashboard() {
   const [stats, setStats] = useState({
@@ -24,10 +24,10 @@ function Dashboard() {
     try {
       setLoading(true);
       const [alunosRes, cursosRes, professoresRes, colaboradoresRes] = await Promise.all([
-        axios.get(`${apiUrl}/api/alunos`),
-        axios.get(`${apiUrl}/api/cursos`),
-        axios.get(`${apiUrl}/api/professores`),
-        axios.get(`${apiUrl}/api/colaboradores`)
+        axios.get(`/api/alunos`),
+        axios.get(`/api/cursos`),
+        axios.get(`/api/professores`),
+        axios.get(`/api/colaboradores`)
       ]);
 
       setStats({

@@ -97,7 +97,9 @@ class Aluno {
 }
 
     // Verificar aluno
+
     static async verificar(id, colaboradorId) {
+
     // Primeiro, busca o nome do colaborador
     let colaboradorNome = 'Não informado'; // Valor padrão
     try {
@@ -108,6 +110,10 @@ class Aluno {
         } else {
             console.warn(`Colaborador com ID ${colaboradorId} não encontrado.`);
         }
+        return {
+            success: true,
+            colaboradorNome: colaboradorNome
+        };
     } catch (colabError) {
         console.error('Erro ao buscar nome do colaborador:', colabError);
         // Continua mesmo se não encontrar o colaborador, usando o nome padrão
@@ -127,6 +133,7 @@ class Aluno {
         console.error('Erro ao atualizar aluno para verificado:', updateError);
         return false; // Retorna false se houver erro na atualização
     }
+
 }
 
 module.exports = Aluno;

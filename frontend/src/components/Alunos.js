@@ -9,7 +9,210 @@ function Alunos() {
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingAluno, setEditingAluno] = useState(null);
+  import React, { useState, useEffect } from 'react';
+  import axios from 'axios';
 
+  function Alunos() {
+    const [alunos, setAlunos] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [showForm, setShowForm] = useState(false);
+    const [editingAluno, setEditingAluno] = useState(null);
+
+    // Estado inicial para o formulário
+    const [formData, setFormData] = useState({
+      Nome: '',
+      CPF: '',
+      Data_Nascimento: '',
+      Email: '',
+      Telefone: '',
+      Endereco: '',
+      Renda_Familiar: '',
+      Conheceu_Como: '',
+      Colaborador_Resp: '',
+    });
+
+    useEffect(() => {
+      fetchAlunos();
+    }, []);
+
+    // Função para buscar lista de alunos da API
+    const fetchAlunos = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`/api/alunos`);
+        setAlunos(response.data.data || []);
+      } catch (err) {
+        setError('Erro ao carregar alunos');
+        console.error('Erro ao buscar alunos:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Atualizar dados do formulário ao digitar
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    };
+
+    // Validação básica do formulário
+    const validateForm = () => {
+      if (!formData.Nome || !formData.CPF) {
+        setError('Por favor, preencha campos obrigatórios: Nome e CPF.');
+        return false;
+      }
+      return true;
+    };
+
+    // Enviar formulário para criar ou editar aluno
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (!validateForm()) return; // Não enviar se o formulário for inválido
+      try {
+        if (editingAluno) {
+          // Editar aluno
+          await axios.put(`/api/alunos/${editingAluno.ID_Aluno}`, formData);
+        } else {
+          // Criar novo aluno
+          await axios.post(`/api/alunos`, formData);
+        }
+
+        // Resetar formulário
+        setShowForm(false);
+        setEditingAluno(null);
+        setFormData({
+          Nome: '',
+          CPF: '',
+          Data_Nascimento: '',
+          Email: '',
+          Telefone: '',
+          Endereco: '',
+          Renda_Familiar: '',
+          Conheceu_Como: '',
+          Colaborador_Resp: '',
+        });
+        fetchAlunos(); // Atualizar lista de alunos
+      } catch (err) {
+        setError('Erro ao salvar aluno');
+        console.error('Erro ao salvar aluno:', err);
+      }
+    };
+
+    // Editar aluno selecionado
+    const handleEdit = (aluno) => {
+      setEditingAluno(aluno);
+      setFormData({
+        Nome: aluno.Nome || '',
+        CPF: aluno.CPF || '',
+        Data_Nascimento: aluno.Data_Nascimento || '',
+        Email: aluno.Email || '',
+        Telefone: aluno.Telefone || '',
+        Endereco: aluno.Endereco || '',
+        Renda_Familiar: aluno.Renda_Familiar || '',
+        Conheceu_Como: aluno.Conheceu_Como || '',
+        Colaborador_Resp: aluno.Colaborador_Resp || '',
+      });
+      setShowForm(true);
+    };
+
+    // Confirmar exclusão de aluno
+    const handleDelete = async (id) => {
+      if (window.confirm('Tem certeza que deseja deletar este aluno?')) {
+        try {
+          await axios.delete(`/api/alunos/${id}`);
+          fetchAlunos();
+        } catch (err) {
+          setError('Erro ao deletar aluno');
+          console.error('Erro ao deletar aluno:', err);
+        }
+      }
+    };
+
+    // Nova função pós-backend: verificar aluno
+    const handleVerificar = async (id) => {
+      try {
+        await axios.post(`/api/alunos/${id}/verificar`, { colaboradorId: 1 });
+        fetchAlunos(); // Atualizar lista de alunos
+      } catch (err) {
+        setError('Erro ao verificar aluno');
+        console.error('Erro ao verificar aluno:', err);
+      }
+    };
+
+    // Formatar valores monetários
+    const formatCurrency = (value) => {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format(value || 0);
+    };
+
+    // Formatar datas
+    const formatDate = (date) => {
+      if (!date) return '-';
+      return new Date(date).toLocaleDateString('pt-BR');
+    };
+
+    if (loading) {
+      return <h2>Carregando alunos...</h2>;
+    }
+
+    return (
+        <div>
+          {/* Mensagem de erro amigável */}
+          {error && <div className="alert alert-danger">{error}</div>}
+
+          {/* Conteúdo da aplicação */}
+          <h2>👨‍🎓 Gerenciar Alunos</h2>
+          {/* Botão para abrir formulário */}
+          <button onClick={() => setShowForm(true)}>Adicionar Aluno</button>
+
+          {/* Tabela de alunos */}
+          <table>
+            <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Email</th>
+              <th>Renda</th>
+              <th>Ações</th>
+            </tr>
+            </thead>
+            <tbody>
+            {alunos.map((aluno) => (
+                <tr key={aluno.ID_Aluno}>
+                  <td>{aluno.Nome}</td>
+                  <td>{aluno.Email}</td>
+                  <td>{formatCurrency(aluno.Renda_Familiar)}</td>
+                  <td>
+                    <button onClick={() => handleEdit(aluno)}>Editar</button>
+                    <button onClick={() => handleDelete(aluno.ID_Aluno)}>Deletar</button>
+                  </td>
+                </tr>
+            ))}
+            </tbody>
+          </table>
+
+          {/* Formulário */}
+          {showForm && (
+              <form onSubmit={handleSubmit}>
+                <input
+                    name="Nome"
+                    placeholder="Nome"
+                    value={formData.Nome}
+                    onChange={handleInputChange}
+                />
+                <button type="submit">Salvar</button>
+              </form>
+          )}
+        </div>
+    );
+  }
+
+  export default Alunos;
 
 
 

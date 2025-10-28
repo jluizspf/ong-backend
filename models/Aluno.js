@@ -31,35 +31,35 @@ class Aluno {
     // Criar novo aluno
     static async create(alunoData) {
         const { Nome, CPF, Data_Nascimento, Email, Telefone, Endereco, Renda_Familiar, Conheceu_Como, Colaborador_Resp } = alunoData;
-        
+
         const sql = `
             INSERT INTO Aluno (Nome, CPF, Data_Nascimento, Email, Telefone, Endereco, Renda_Familiar, Conheceu_Como, Colaborador_Resp)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        
+
         const result = await executeQuery(sql, [
             Nome, CPF, Data_Nascimento, Email, Telefone, Endereco, Renda_Familiar, Conheceu_Como, Colaborador_Resp
         ]);
-        
+
         return result.insertId;
     }
 
     // Atualizar aluno
     static async update(id, alunoData) {
         const { Nome, CPF, Data_Nascimento, Email, Telefone, Endereco, Renda_Familiar, Conheceu_Como, Verificado, Colaborador_Resp } = alunoData;
-        
+
         const sql = `
             UPDATE Aluno 
             SET Nome = ?, CPF = ?, Data_Nascimento = ?, Email = ?, Telefone = ?, 
                 Endereco = ?, Renda_Familiar = ?, Conheceu_Como = ?, Verificado = ?, Colaborador_Resp = ?
             WHERE ID_Aluno = ?
         `;
-        
+
         const result = await executeQuery(sql, [
-            Nome, CPF, Data_Nascimento, Email, Telefone, Endereco, Renda_Familiar, 
+            Nome, CPF, Data_Nascimento, Email, Telefone, Endereco, Renda_Familiar,
             Conheceu_Como, Verificado, Colaborador_Resp, id
         ]);
-        
+
         return result.affectedRows > 0;
     }
 
@@ -85,55 +85,42 @@ class Aluno {
     // Adicionar escolaridade
     static async addEscolaridade(alunoId, escolaridadeData) {
         const { Nivel, Instituicao, Ano_Conclusao } = escolaridadeData;
-        
+
         const sql = `
             INSERT INTO Escolaridade (ID_Aluno, Nivel, Instituicao, Ano_Conclusao)
             VALUES (?, ?, ?, ?)
         `;
-        
+
         const result = await executeQuery(sql, [alunoId, Nivel, Instituicao, Ano_Conclusao]);
         return result.insertId;
     }
-}
 
     // Verificar aluno
-
     static async verificar(id, colaboradorId) {
+        // Primeiro, busca o nome do colaborador
+        let colaboradorNome = 'Não informado'; // Valor padrão
+        try {
+            const colabSql = 'SELECT Nome FROM Colaborador WHERE ID_Colab = ?';
+            const colabResult = await executeQuery(colabSql, [colaboradorId]);
+            if (colabResult && colabResult.length > 0) {
+                colaboradorNome = colabResult[0].Nome;
+            } else {
+                console.warn(`Colaborador com ID ${colaboradorId} não encontrado.`);
+            }
 
-    // Primeiro, busca o nome do colaborador
-    let colaboradorNome = 'Não informado'; // Valor padrão
-    try {
-        const colabSql = 'SELECT Nome FROM Colaborador WHERE ID_Colab = ?';
-        const colabResult = await executeQuery(colabSql, [colaboradorId]);
-        if (colabResult && colabResult.length > 0) {
-            colaboradorNome = colabResult[0].Nome;
-        } else {
-            console.warn(`Colaborador com ID ${colaboradorId} não encontrado.`);
+            // Atualiza o aluno como verificado no banco de dados
+            const sql = `
+                UPDATE Aluno
+                SET Verificado = 1, Colaborador_Resp = ?
+                WHERE ID_Aluno = ?
+            `;
+            const result = await executeQuery(sql, [colaboradorNome, id]);
+            return { success: result.affectedRows > 0, colaboradorNome };
+        } catch (error) {
+            console.error('Erro ao verificar aluno:', error);
+            throw error; // Lança o erro novamente para que ele possa ser tratado externamente
         }
-        return {
-            success: true,
-            colaboradorNome: colaboradorNome
-        };
-    } catch (colabError) {
-        console.error('Erro ao buscar nome do colaborador:', colabError);
-        // Continua mesmo se não encontrar o colaborador, usando o nome padrão
     }
-
-    // Agora, atualiza o aluno
-    const sql = `
-        UPDATE Aluno
-        SET Verificado = 1, Colaborador_Resp = ?
-        WHERE ID_Aluno = ?
-    `;
-
-    try {
-        const result = await executeQuery(sql, [colaboradorNome, id]);
-        return result.affectedRows > 0;
-    } catch (updateError) {
-        console.error('Erro ao atualizar aluno para verificado:', updateError);
-        return false; // Retorna false se houver erro na atualização
-    }
-
 }
 
 module.exports = Aluno;

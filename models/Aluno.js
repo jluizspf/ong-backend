@@ -1,76 +1,43 @@
 const { executeQuery } = require('../config/database-sqlite');
 
 class Aluno {
-    // Buscar todos os alunos
     static async getAll() {
-        const sql = `
-            SELECT a.*, 
-                   GROUP_CONCAT(e.Nivel, ', ') as Escolaridades
-            FROM Aluno a
-            LEFT JOIN Escolaridade e ON a.ID_Aluno = e.ID_Aluno
-            GROUP BY a.ID_Aluno
-            ORDER BY a.Nome
-        `;
+        const sql = this._createGetAllSql(); // Método auxiliar para criar SQL
         return await executeQuery(sql);
     }
 
-    // Buscar aluno por ID
-    static async getById(id) {
-        const sql = `
-            SELECT a.*, 
-                   GROUP_CONCAT(e.Nivel, ', ') as Escolaridades
-            FROM Aluno a
-            LEFT JOIN Escolaridade e ON a.ID_Aluno = e.ID_Aluno
-            WHERE a.ID_Aluno = ?
-            GROUP BY a.ID_Aluno
-        `;
-        const result = await executeQuery(sql, [id]);
-        return result[0] || null;
+    static async getById(alunoId) {
+        const sql = this._createGetByIdSql(); // Método auxiliar
+        const result = await executeQuery(sql, [alunoId]);
+        return result[0] || null; // Retorna o primeiro item ou null se não existir
     }
 
-    // Criar novo aluno
     static async create(alunoData) {
-        const { Nome, CPF, Data_Nascimento, Email, Telefone, Endereco, Renda_Familiar, Conheceu_Como, Colaborador_Resp } = alunoData;
-        
-        const sql = `
-            INSERT INTO Aluno (Nome, CPF, Data_Nascimento, Email, Telefone, Endereco, Renda_Familiar, Conheceu_Como, Colaborador_Resp)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-        
+        const sql = this._createInsertSql(); // Reutiliza SQL para criação
         const result = await executeQuery(sql, [
-            Nome, CPF, Data_Nascimento, Email, Telefone, Endereco, Renda_Familiar, Conheceu_Como, Colaborador_Resp
+            alunoData.Nome, alunoData.CPF, alunoData.Data_Nascimento, alunoData.Email,
+            alunoData.Telefone, alunoData.Endereco, alunoData.Renda_Familiar,
+            alunoData.Conheceu_Como, alunoData.Colaborador_Resp
         ]);
-        
-        return result.insertId;
+        return result.insertId; // Retorna ID do recém-criado
     }
 
-    // Atualizar aluno
-    static async update(id, alunoData) {
-        const { Nome, CPF, Data_Nascimento, Email, Telefone, Endereco, Renda_Familiar, Conheceu_Como, Verificado, Colaborador_Resp } = alunoData;
-        
-        const sql = `
-            UPDATE Aluno 
-            SET Nome = ?, CPF = ?, Data_Nascimento = ?, Email = ?, Telefone = ?, 
-                Endereco = ?, Renda_Familiar = ?, Conheceu_Como = ?, Verificado = ?, Colaborador_Resp = ?
-            WHERE ID_Aluno = ?
-        `;
-        
+    static async update(alunoId, alunoData) {
+        const sql = this._createUpdateSql(); // Reutiliza SQL de atualização
         const result = await executeQuery(sql, [
-            Nome, CPF, Data_Nascimento, Email, Telefone, Endereco, Renda_Familiar, 
-            Conheceu_Como, Verificado, Colaborador_Resp, id
+            alunoData.Nome, alunoData.CPF, alunoData.Data_Nascimento, alunoData.Email,
+            alunoData.Telefone, alunoData.Endereco, alunoData.Renda_Familiar,
+            alunoData.Conheceu_Como, alunoData.Verificado, alunoData.Colaborador_Resp, alunoId
         ]);
-        
-        return result.affectedRows > 0;
+        return result.affectedRows > 0; // Retorna verdadeiro se algo foi alterado
     }
 
-    // Deletar aluno
-    static async delete(id) {
-        const sql = 'DELETE FROM Aluno WHERE ID_Aluno = ?';
-        const result = await executeQuery(sql, [id]);
-        return result.affectedRows > 0;
+    static async delete(alunoId) {
+        const sql = 'DELETE FROM Aluno WHERE ID_Aluno = ?'; // SQL direto
+        const result = await executeQuery(sql, [alunoId]);
+        return result.affectedRows > 0; // Confirma exclusão
     }
 
-    // Buscar alunos por curso
     static async getByCurso(cursoId) {
         const sql = `
             SELECT a.*, i.Data_Inscricao, i.Status as Status_Inscricao
@@ -82,58 +49,85 @@ class Aluno {
         return await executeQuery(sql, [cursoId]);
     }
 
-    // Adicionar escolaridade
     static async addEscolaridade(alunoId, escolaridadeData) {
-        const { Nivel, Instituicao, Ano_Conclusao } = escolaridadeData;
-        
         const sql = `
             INSERT INTO Escolaridade (ID_Aluno, Nivel, Instituicao, Ano_Conclusao)
             VALUES (?, ?, ?, ?)
         `;
-        
-        const result = await executeQuery(sql, [alunoId, Nivel, Instituicao, Ano_Conclusao]);
-        return result.insertId;
+        const result = await executeQuery(sql, [
+            alunoId,
+            escolaridadeData.Nivel,
+            escolaridadeData.Instituicao,
+            escolaridadeData.Ano_Conclusao
+        ]);
+        return result.insertId; // Retorna ID inserido
     }
-}
 
-    // Verificar aluno
+    // Função para verificar um aluno
+    static async verificar(alunoId, colaboradorId) {
+        const colaboradorNome = await this._obterColaboradorNome(colaboradorId); // Extraiu função
+        const sql = `
+            UPDATE Aluno
+            SET Verificado = 1, Colaborador_Resp = ?
+            WHERE ID_Aluno = ?
+        `;
+        const result = await executeQuery(sql, [colaboradorNome, alunoId]);
 
-    static async verificar(id, colaboradorId) {
-
-    // Primeiro, busca o nome do colaborador
-    let colaboradorNome = 'Não informado'; // Valor padrão
-    try {
-        const colabSql = 'SELECT Nome FROM Colaborador WHERE ID_Colab = ?';
-        const colabResult = await executeQuery(colabSql, [colaboradorId]);
-        if (colabResult && colabResult.length > 0) {
-            colaboradorNome = colabResult[0].Nome;
-        } else {
-            console.warn(`Colaborador com ID ${colaboradorId} não encontrado.`);
+        if (result.affectedRows > 0) {
+            return { success: true, message: "Aluno verificado com sucesso.", colaboradorNome };
         }
-        return {
-            success: true,
-            colaboradorNome: colaboradorNome
-        };
-    } catch (colabError) {
-        console.error('Erro ao buscar nome do colaborador:', colabError);
-        // Continua mesmo se não encontrar o colaborador, usando o nome padrão
+        return { success: false, message: "Falha ao verificar o aluno." };
     }
 
-    // Agora, atualiza o aluno
-    const sql = `
-        UPDATE Aluno
-        SET Verificado = 1, Colaborador_Resp = ?
-        WHERE ID_Aluno = ?
-    `;
-
-    try {
-        const result = await executeQuery(sql, [colaboradorNome, id]);
-        return result.affectedRows > 0;
-    } catch (updateError) {
-        console.error('Erro ao atualizar aluno para verificado:', updateError);
-        return false; // Retorna false se houver erro na atualização
+    // Métodos auxiliares privados para criar SQLs
+    static _createGetAllSql() {
+        return `
+            SELECT a.*, GROUP_CONCAT(e.Nivel, ', ') as Escolaridades
+            FROM Aluno a
+            LEFT JOIN Escolaridade e ON a.ID_Aluno = e.ID_Aluno
+            GROUP BY a.ID_Aluno
+            ORDER BY a.Nome
+        `;
     }
 
+    static _createGetByIdSql() {
+        return `
+            SELECT a.*, GROUP_CONCAT(e.Nivel, ', ') as Escolaridades
+            FROM Aluno a
+            LEFT JOIN Escolaridade e ON a.ID_Aluno = e.ID_Aluno
+            WHERE a.ID_Aluno = ?
+            GROUP BY a.ID_Aluno
+        `;
+    }
+
+    static _createInsertSql() {
+        return `
+            INSERT INTO Aluno (Nome, CPF, Data_Nascimento, Email, Telefone, Endereco, 
+            Renda_Familiar, Conheceu_Como, Colaborador_Resp)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+    }
+
+    static _createUpdateSql() {
+        return `
+            UPDATE Aluno 
+            SET Nome = ?, CPF = ?, Data_Nascimento = ?, Email = ?, Telefone = ?, 
+                Endereco = ?, Renda_Familiar = ?, Conheceu_Como = ?, Verificado = ?, 
+                Colaborador_Resp = ?
+            WHERE ID_Aluno = ?
+        `;
+    }
+
+    static async _obterColaboradorNome(colaboradorId) {
+        try {
+            const sql = 'SELECT Nome FROM Colaborador WHERE ID_Colab = ?';
+            const result = await executeQuery(sql, [colaboradorId]);
+            return result.length > 0 ? result[0].Nome : 'Não informado';
+        } catch (error) {
+            console.error('Erro ao buscar colaborador:', error);
+            return 'Não informado';
+        }
+    }
 }
 
 module.exports = Aluno;

@@ -178,8 +178,11 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 
 ## 👥 Autores
 
-- **Seu Nome** - *Desenvolvimento inicial* - [seu-github](https://github.com/seu-usuario)
+- Alexandre dos Santos Abrantes
+- Alexandre Xavier Dantas
+- Cristian Lopes dos Santos Germano
+- Dafny Caroline Freitas
+- José Luiz dos Santos Pereira Filho
+- Mayra Alencar Vidal
 
-## 📞 Suporte
 
-Para suporte, envie um email para seu-email@exemplo.com ou abra uma issue no GitHub.

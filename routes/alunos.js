@@ -136,6 +136,42 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// POST /api/alunos/:id/verificar - Verificar aluno
+router.post('/:id/verificar', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { colaboradorId } = req.body; // Pega o ID do colaborador do corpo da requisição
+
+        if (!colaboradorId) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID do colaborador é obrigatório'
+            });
+        }
+
+        const verified = await Aluno.verificar(id, colaboradorId);
+
+        if (!verified) {
+            return res.status(404).json({
+                success: false,
+                message: 'Aluno não encontrado ou erro ao verificar'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Aluno verificado com sucesso'
+        });
+    } catch (error) {
+        console.error('Erro ao verificar aluno:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor',
+            error: error.message
+        });
+    }
+});
+
 // GET /api/alunos/curso/:cursoId - Buscar alunos por curso
 router.get('/curso/:cursoId', async (req, res) => {
     try {

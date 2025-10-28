@@ -96,4 +96,37 @@ class Aluno {
     }
 }
 
+    // Verificar aluno
+    static async verificar(id, colaboradorId) {
+    // Primeiro, busca o nome do colaborador
+    let colaboradorNome = 'Não informado'; // Valor padrão
+    try {
+        const colabSql = 'SELECT Nome FROM Colaborador WHERE ID_Colab = ?';
+        const colabResult = await executeQuery(colabSql, [colaboradorId]);
+        if (colabResult && colabResult.length > 0) {
+            colaboradorNome = colabResult[0].Nome;
+        } else {
+            console.warn(`Colaborador com ID ${colaboradorId} não encontrado.`);
+        }
+    } catch (colabError) {
+        console.error('Erro ao buscar nome do colaborador:', colabError);
+        // Continua mesmo se não encontrar o colaborador, usando o nome padrão
+    }
+
+    // Agora, atualiza o aluno
+    const sql = `
+        UPDATE Aluno
+        SET Verificado = 1, Colaborador_Resp = ?
+        WHERE ID_Aluno = ?
+    `;
+
+    try {
+        const result = await executeQuery(sql, [colaboradorNome, id]);
+        return result.affectedRows > 0;
+    } catch (updateError) {
+        console.error('Erro ao atualizar aluno para verificado:', updateError);
+        return false; // Retorna false se houver erro na atualização
+    }
+}
+
 module.exports = Aluno;

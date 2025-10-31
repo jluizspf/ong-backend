@@ -89,3 +89,18 @@ Thumbs.db
 # Build files
 build/
 dist/
+
+# regras adicionais de segurança
+echo "" >> .gitignore
+echo "# Ficheiros de Log, Sistema e Chaves Secretas" >> .gitignore
+echo "key.txt" >> .gitignore
+echo "key.txt.pub" >> .gitignore
+echo "nohup.out" >> .gitignore
+echo "*.save" >> .gitignore
+echo "*.db" >> .gitignore
+echo "node" >> .gitignore
+echo "ong-backend@1.0.0" >> .gitignore
+echo "server.jsxq" >> .gitignore
+echo "database/ervice*" >> .gitignore
+echo "database/tate*" >> .gitignore
+echo "frontend/package.jsony" >> .gitignore

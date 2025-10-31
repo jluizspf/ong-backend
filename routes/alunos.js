@@ -49,32 +49,75 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// POST /api/alunos - Criar novo aluno
+// Rota: Criar novo aluno (POST)
 router.post('/', async (req, res) => {
     try {
-        const alunoData = req.body;
+        const { Email, CPF } = req.body;
+
+        // --- ETAPA 1: Sua verificação (MELHORADA) ---
+
+        // 1a. Verificar se o E-mail já existe
+        if (Email) {
+            const emailExistente = await Aluno.findByEmail(Email);
+            if (emailExistente) {
+                return res.status(409).json({ // 409 Conflict
+                    success: false,
+                    message: 'Erro: O E-mail fornecido já está cadastrado.'
+                });
+            }
+        }
+
+        // 1b. Verificar se o CPF já existe
+        if (CPF) {
+            // (Precisamos assumir que você tem Aluno.findByCPF no seu models/Aluno.js)
+            // Se não tiver, esta é uma boa altura para o criar!
+            // Por agora, vamos deixar o try...catch tratar disto.
+            // Se tiver o findByCPF, descomente o bloco abaixo.
+            /*
+            const cpfExistente = await Aluno.findByCPF(CPF); 
+            if (cpfExistente) {
+                return res.status(409).json({ // 409 Conflict
+                    success: false,
+                    message: 'Erro: O CPF fornecido já está cadastrado.'
+                });
+            }
+            */
+        }
+
+        // --- ETAPA 2: Criar o Aluno (Se tudo passou) ---
+        // O Aluno.create vai tentar inserir.
+        // Se o CPF for duplicado (e não o verificámos acima),
+        // o try...catch abaixo vai apanhar o erro SQLITE_CONSTRAINT.
         
-        // Validações básicas
-        if (!alunoData.Nome || !alunoData.CPF) {
-            return res.status(400).json({
-                success: false,
-                message: 'Nome e CPF são obrigatórios'
+        const novoAlunoId = await Aluno.create(req.body);
+        
+        res.status(201).json({ 
+            success: true, 
+            message: 'Aluno criado com sucesso!', 
+            data: { id: novoAlunoId } 
+        });
+    
+    } catch (error) {
+        // --- ETAPA 3: Apanhar erros (O mais importante!) ---
+
+        // Verifica se o erro é o SQLITE_CONSTRAINT (de CPF ou Email)
+        if (error.code === 'SQLITE_CONSTRAINT') {
+            let campoFalha = 'CPF ou E-mail';
+            if (error.message.includes('CPF')) campoFalha = 'CPF';
+            if (error.message.includes('Email')) campoFalha = 'E-mail';
+            
+            return res.status(409).json({ // 409 Conflict
+                success: false, 
+                message: `Erro: ${campoFalha} já cadastrado no sistema.` 
             });
         }
         
-        const alunoId = await Aluno.create(alunoData);
-        
-        res.status(201).json(serializeBigInt({
-            success: true,
-            message: 'Aluno criado com sucesso',
-            data: { id: alunoId }
-        }));
-    } catch (error) {
-        console.error('Erro ao criar aluno:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Erro interno do servidor',
-            error: error.message
+        // Se for outro erro qualquer
+        console.error("Erro inesperado ao criar aluno:", error); // Log para o PM2
+        res.status(500).json({ 
+            success: false, 
+            message: 'Erro interno no servidor ao criar aluno.', 
+            error: error.message 
         });
     }
 });

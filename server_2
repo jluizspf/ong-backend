@@ -1,0 +1,89 @@
+const express = require('express');
+const cors = require('cors');
+const path = require('path'); // Adicionado para a rota de health antiga, se necessário
+const { initializeDatabase, testConnection } = require('./config/database-sqlite');
+const { handleError } = require('./routes/utils');
+
+// Importação das Rotas
+const alunosRoutes = require('./routes/alunos');
+const professoresRoutes = require('./routes/professores');
+const cursosRoutes = require('./routes/cursos');
+const colaboradoresRoutes = require('./routes/colaboradores');
+
+// Configuração do App
+const app = express();
+const PORT = process.env.PORT || 3000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
+// Middlewares
+app.use(cors()); // Habilita CORS para todas as origens
+app.use(express.json()); // Middleware para parsear JSON
+app.use(express.urlencoded({ extended: true })); // Middleware para parsear form-data
+
+// --- ROTAS PRINCIPAIS ---
+
+// Rota de "Bem-vindo"
+app.get('/', (req, res) => {
+    res.json({
+        message: "API da ONG - Sistema de Gestão Educacional",
+        version: "1.0.0", // Do package.json
+        status: "online",
+        environment: NODE_ENV,
+        timestamp: new Date().toISOString()
+    });
+});
+
+// Rota de saúde da API
+app.get('/health', async (req, res) => {
+    try {
+        const dbStatus = await testConnection();
+        res.json({
+            status: 'ok',
+            database: dbStatus ? 'connected' : 'disconnected',
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'error',
+            message: 'Erro ao verificar saúde da API',
+            error: error.message
+        });
+    }
+});
+
+// --- ROTAS DA API ---
+app.use('/api/alunos', alunosRoutes);
+app.use('/api/professores', professoresRoutes);
+app.use('/api/cursos', cursosRoutes);
+app.use('/api/colaboradores', colaboradoresRoutes);
+
+// Middleware para rotas não encontradas (404)
+app.use((req, res, next) => {
+    res.status(404).json({ erro: 'Endpoint não encontrado', rota: req.originalUrl });
+});
+
+// Middleware genérico de tratamento de erros (fallback)
+app.use((err, req, res, next) => {
+    console.error("Erro não tratado:", err.stack);
+    handleError(res, err, 'Erro interno do servidor');
+});
+
+// Inicialização do Servidor
+const startServer = async () => {
+    try {
+        await initializeDatabase(); // Inicializa o DB (cria tabelas se não existirem)
+        app.listen(PORT, () => {
+            console.log(`🚀 Servidor rodando na porta ${PORT}`);
+            console.log(`📊 Ambiente: ${NODE_ENV}`);
+            console.log(`✅ Conexão com banco de dados estabelecida!`);
+            console.log(`🌐 API disponível em: http://localhost:${PORT}`);
+            console.log(`📋 Documentação (Health): http://localhost:${PORT}/health`);
+        });
+    } catch (error) {
+        console.error("❌ Falha ao inicializar o servidor:", error);
+        process.exit(1); // Sai se não conseguir ligar o DB
+    }
+};
+
+// Inicia o processo
+startServer();

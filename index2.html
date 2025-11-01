@@ -217,24 +217,80 @@ async function buscarCEP(){
   }
 }
 
-// Formulário
-document.getElementById("formMatricula").addEventListener("submit", function(e){
-  e.preventDefault();
-  let campos = ["nome","cpf","nascimento","sexo","orientacao","email","telefone","cep","endereco","numero","curso"];
-  let valido=true;
-  campos.forEach(campo=>{
-    let input=document.getElementById(campo);
-    let error=document.getElementById(campo+"Error");
-    if(input && !input.value.trim()){ if(error) error.classList.remove("hidden"); valido=false; } else if(error) error.classList.add("hidden");
+  document.getElementById("formMatricula").addEventListener("submit", async function(e){
+    e.preventDefault();
+    let campos = ["nome","cpf","nascimento","email","telefone","endereco","numero","origem"]; // Campos da tabela Aluno + CEP/Número (precisa combinar no backend)
+    let valido=true;
+    let dadosAluno = {};
+
+    campos.forEach(campoId=>{
+      let input=document.getElementById(campoId);
+      let error=document.getElementById(campoId+"Error");
+      if(input && !input.value.trim()){
+        if(error) error.classList.remove("hidden");
+        valido=false;
+      } 
+      else {
+        if(error) error.classList.add("hidden");
+        // Mapeia os IDs do HTML para os nomes das colunas no BD (conforme model/Aluno.js)
+        let nomeCampoBD = campoId.charAt(0).toUpperCase() + campoId.slice(1); // Ex: nome -> Nome
+        if (nomeCampoBD === "Nascimento") nomeCampoBD = "Data_Nascimento";
+        if (nomeCampoBD === "Origem") nomeCampoBD = "Conheceu_Como";
+        // Ignora campos que não vão direto para a tabela Aluno (como curso, periodo)
+        // O endereço completo precisa ser montado (combinando endereco e numero)
+        if (["Nome", "CPF", "Data_Nascimento", "Email", "Telefone", "Conheceu_Como"].includes(nomeCampoBD)) {
+             dadosAluno[nomeCampoBD] = input.value.trim();
+        }
+      }
+    });
   });
-  if(valido){
-    alert("Obrigado por fazer sua matrícula, em breve entraremos em contato!");
-    document.getElementById("formMatricula").reset();
-    document.getElementById("pagina2").classList.add("hidden");
-    document.getElementById("pagina1").classList.remove("hidden");
-    document.getElementById("cursoSelecionado").innerHTML='';
-  }
-});
+
+// Combina endereço e número (exemplo simples, ajuste conforme necessário)
+const enderecoCompleto = `${document.getElementById("endereco").value.trim()}, ${document.getElementById("numero").value.trim()}`;
+    dadosAluno["Endereco"] = enderecoCompleto;
+
+    // Adiciona Renda_Familiar (se tiver o campo no HTML, senão, defina um valor padrão ou omita)
+    // Supondo que você adicione um campo <input type="number" id="rendaFamiliar">
+    const rendaInput = document.getElementById("rendaFamiliar"); // Crie este input no seu HTML se necessário
+    if (rendaInput) {
+        dadosAluno["Renda_Familiar"] = parseFloat(rendaInput.value) || null;
+    }
+
+
+    if(valido){
+      try {
+        // Envia os dados para a API
+        const response = await fetch('/api/alunos', { // Use o endpoint da sua API
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(dadosAluno),
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            alert("Matrícula enviada com sucesso! ID: " + result.data.id);
+            document.getElementById("formMatricula").addEventListener("submit", async function(e){
+              e.preventDefault();
+            document.getElementById("pagina2").classList.add("hidden");
+            document.getElementById("pagina1").classList.remove("hidden");
+            document.getElementById("cursoSelecionado").innerHTML='';
+            });
+        } else {
+            // Exibe mensagem de erro da API ou uma genérica
+            alert("Erro ao enviar matrícula: " + (result.message || 'Erro desconhecido'));
+            console.error("Erro da API:", result);
+        }
+      } 
+      catch (error) {
+          alert("Erro de conexão ao enviar matrícula. Tente novamente.");
+          console.error("Erro no fetch:", error);
+      }
+    } else {
+         alert("Por favor, preencha todos os campos obrigatórios.");
+    }
 
 // Admin
 function abrirLoginAdmin(){

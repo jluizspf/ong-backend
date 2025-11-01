@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Aluno = require('../models/Aluno');
 const {serializeBigInt} = require("./utils");
+const Joi = require('joi');
 
 // GET /api/alunos - Buscar todos os alunos
 router.get('/', async (req, res) => {
@@ -57,31 +58,41 @@ router.post('/', async (req, res) => {
         // --- ETAPA 1: Sua verificação (MELHORADA) ---
 
         // 1a. Verificar se o E-mail já existe
-        if (Email) {
+        if (Email && typeof Email === 'string' && Email.trim() !== '') {
             const emailExistente = await Aluno.findByEmail(Email);
             if (emailExistente) {
-                return res.status(409).json({ // 409 Conflict
+                return res.status(409).json({
                     success: false,
                     message: 'Erro: O E-mail fornecido já está cadastrado.'
                 });
             }
         }
 
+// Schema de validação
+        const alunoSchema = Joi.object({
+            nome: Joi.string().min(3).required(),
+            Email: Joi.string().email().required(),
+            CPF: Joi.string().pattern(/^[0-9]{11}$/).required(),
+        });
+
+// Validação
+        const { error } = alunoSchema.validate(req.body);
+        if (error) {
+            return res.status(400).json({ // 400 Bad Request
+                success: false,
+                message: `Erro de validação: ${error.details[0].message}`
+            });
+        }
+
         // 1b. Verificar se o CPF já existe
-        if (CPF) {
-            // (Precisamos assumir que você tem Aluno.findByCPF no seu models/Aluno.js)
-            // Se não tiver, esta é uma boa altura para o criar!
-            // Por agora, vamos deixar o try...catch tratar disto.
-            // Se tiver o findByCPF, descomente o bloco abaixo.
-            /*
-            const cpfExistente = await Aluno.findByCPF(CPF); 
+        if (CPF && typeof CPF === 'string' && CPF.match(/^[0-9]{11}$/)) { // Exemplo de REGEX para CPF
+            const cpfExistente = await Aluno.findByCPF(CPF);
             if (cpfExistente) {
-                return res.status(409).json({ // 409 Conflict
+                return res.status(409).json({
                     success: false,
                     message: 'Erro: O CPF fornecido já está cadastrado.'
                 });
             }
-            */
         }
 
         // --- ETAPA 2: Criar o Aluno (Se tudo passou) ---

@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Aluno = require('../models/Aluno');
 const {serializeBigInt} = require("./utils");
+const validarAluno = require('../middlewares/validar-aluno');
+
+
 
 // GET /api/alunos - Buscar todos os alunos
 router.get('/', async (req, res) => {
@@ -50,76 +53,15 @@ router.get('/:id', async (req, res) => {
 });
 
 // Rota: Criar novo aluno (POST)
-router.post('/', async (req, res) => {
-    try {
-        const { Email, CPF } = req.body;
-
-        // --- ETAPA 1: Sua verificação (MELHORADA) ---
-
-        // 1a. Verificar se o E-mail já existe
-        if (Email) {
-            const emailExistente = await Aluno.findByEmail(Email);
-            if (emailExistente) {
-                return res.status(409).json({ // 409 Conflict
-                    success: false,
-                    message: 'Erro: O E-mail fornecido já está cadastrado.'
-                });
-            }
-        }
-
-        // 1b. Verificar se o CPF já existe
-        if (CPF) {
-            // (Precisamos assumir que você tem Aluno.findByCPF no seu models/Aluno.js)
-            // Se não tiver, esta é uma boa altura para o criar!
-            // Por agora, vamos deixar o try...catch tratar disto.
-            // Se tiver o findByCPF, descomente o bloco abaixo.
-            /*
-            const cpfExistente = await Aluno.findByCPF(CPF); 
-            if (cpfExistente) {
-                return res.status(409).json({ // 409 Conflict
-                    success: false,
-                    message: 'Erro: O CPF fornecido já está cadastrado.'
-                });
-            }
-            */
-        }
-
-        // --- ETAPA 2: Criar o Aluno (Se tudo passou) ---
-        // O Aluno.create vai tentar inserir.
-        // Se o CPF for duplicado (e não o verificámos acima),
-        // o try...catch abaixo vai apanhar o erro SQLITE_CONSTRAINT.
-        
-        const novoAlunoId = await Aluno.create(req.body);
-        
-        res.status(201).json({ 
-            success: true, 
-            message: 'Aluno criado com sucesso!', 
-            data: { id: novoAlunoId } 
-        });
-    
-    } catch (error) {
-        // --- ETAPA 3: Apanhar erros (O mais importante!) ---
-
-        // Verifica se o erro é o SQLITE_CONSTRAINT (de CPF ou Email)
-        if (error.code === 'SQLITE_CONSTRAINT') {
-            let campoFalha = 'CPF ou E-mail';
-            if (error.message.includes('CPF')) campoFalha = 'CPF';
-            if (error.message.includes('Email')) campoFalha = 'E-mail';
-            
-            return res.status(409).json({ // 409 Conflict
-                success: false, 
-                message: `Erro: ${campoFalha} já cadastrado no sistema.` 
-            });
-        }
-        
-        // Se for outro erro qualquer
-        console.error("Erro inesperado ao criar aluno:", error); // Log para o PM2
-        res.status(500).json({ 
-            success: false, 
-            message: 'Erro interno no servidor ao criar aluno.', 
-            error: error.message 
-        });
-    }
+router.post('/', validarAluno, async (req, res) => {
+  try {
+    // aqui req.body.cpf já tem 11 dígitos
+    const novoAluno = await inserirAlunoNoDB(req.body); // sua função existente
+    res.status(201).json({ success: true, data: novoAluno });
+  } catch (err) {
+    console.error('Erro ao inserir aluno:', err);
+    res.status(500).json({ success: false, message: 'Erro interno ao criar aluno' });
+  }
 });
 
 // PUT /api/alunos/:id - Atualizar aluno

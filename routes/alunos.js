@@ -52,11 +52,23 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+// ---- ADICIONE ESTA LINHA DE TESTE AQUI ----
+// Middleware para "espiar" o body antes da validação
+router.use((req, res, next) => {
+  console.log('--- NOVO PEDIDO:', new Date().toISOString(), '---');
+  console.log('BODY RECEBIDO:', JSON.stringify(req.body, null, 2));
+  next();
+});
+// ---- FIM DA LINHA DE TESTE ----
+
+
+
+
 // Rota: Criar novo aluno (POST)
 router.post('/', validarAluno, async (req, res) => {
   try {
     // aqui req.body.cpf já tem 11 dígitos
-    const novoAluno = await inserirAlunoNoDB(req.body); // sua função existente
+    const novoAluno = await Aluno.create(req.body);
     res.status(201).json({ success: true, data: novoAluno });
   } catch (err) {
     console.error('Erro ao inserir aluno:', err);

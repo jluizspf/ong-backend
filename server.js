@@ -1,7 +1,7 @@
-// server.js (substituir arquivo inteiro)
+// server.js (MODERNIZADO)
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
+// const bodyParser = require('body-parser'); // <-- NÃO É MAIS NECESSÁRIO
 const helmet = require('helmet');
 require('dotenv').config();
 
@@ -31,9 +31,10 @@ app.use((req, res, next) => {
 // Segurança e middlewares
 app.use(helmet());
 app.use(cors({ origin: true }));
-app.use(bodyParser.json({ limit: '1mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '1mb' }));
-
+// ---- MUDANÇA AQUI ----
+app.use(express.json({ limit: '1mb' })); // Substitui bodyParser.json
+app.use(express.urlencoded({ extended: true, limit: '1mb' })); // Substitui bodyParser.urlencoded
+// ---- FIM DA MUDANÇA ----
 
 
 // Middleware para log de requisições

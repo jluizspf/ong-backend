@@ -154,6 +154,7 @@ label { font-weight:600; margin-bottom:5px; display:flex; align-items:center; ga
 </div>
 
 <script>
+
 // Admin
 let adminLogin = "admin";
 let adminSenha = "admin";
@@ -217,9 +218,9 @@ async function buscarCEP(){
   }
 }
 
-  document.getElementById("formMatricula").addEventListener("submit", async function(e){
+document.getElementById("formMatricula").addEventListener("submit", async function(e){
     e.preventDefault();
-    let campos = ["nome","cpf","nascimento","email","telefone","endereco","numero","origem"]; // Campos da tabela Aluno + CEP/Número (precisa combinar no backend)
+    let campos = ["nome","cpf","nascimento","email","telefone","endereco","numero","origem"];
     let valido=true;
     let dadosAluno = {};
 
@@ -232,53 +233,46 @@ async function buscarCEP(){
       } 
       else {
         if(error) error.classList.add("hidden");
-        // Mapeia os IDs do HTML para os nomes das colunas no BD (conforme model/Aluno.js)
-        let nomeCampoBD = campoId.charAt(0).toUpperCase() + campoId.slice(1); // Ex: nome -> Nome
-        if (nomeCampoBD === "Nascimento") nomeCampoBD = "Data_Nascimento";
-        if (nomeCampoBD === "Origem") nomeCampoBD = "Conheceu_Como";
-        // Ignora campos que não vão direto para a tabela Aluno (como curso, periodo)
-        // O endereço completo precisa ser montado (combinando endereco e numero)
-        if (["Nome", "CPF", "Data_Nascimento", "Email", "Telefone", "Conheceu_Como"].includes(nomeCampoBD)) {
+        let nomeCampoBD = campoId.charAt(0).toUpperCase() + campoId.slice(1);
+        if (nomeCampoBD === "Cpf") nomeCampoBD = "CPF"; // <--- ADICIONE ESTA LINHA
+        if (nomeCampoBD === "Nascimento") nomeCampoBD = "Data_Nascimento";
+        if (nomeCampoBD === "Origem") nomeCampoBD = "Conheceu_Como";
+        if (["Nome", "CPF", "Data_Nascimento", "Email", "Telefone", "Conheceu_Como"].includes(nomeCampoBD)) {
              dadosAluno[nomeCampoBD] = input.value.trim();
         }
       }
     });
 
-// Combina endereço e número (exemplo simples, ajuste conforme necessário)
     const enderecoCompleto = `${document.getElementById("endereco").value.trim()}, ${document.getElementById("numero").value.trim()}`;
     dadosAluno["Endereco"] = enderecoCompleto;
 
-    // Adiciona Renda_Familiar (se tiver o campo no HTML, senão, defina um valor padrão ou omita)
-    // Supondo que você adicione um campo <input type="number" id="rendaFamiliar">
-    const rendaInput = document.getElementById("rendaFamiliar"); // Crie este input no seu HTML se necessário
+    const rendaInput = document.getElementById("rendaFamiliar");
     if (rendaInput) {
         dadosAluno["Renda_Familiar"] = parseFloat(rendaInput.value) || null;
     }
 
-
     if(valido){
       try {
         // Envia os dados para a API
-        const response = await fetch('/api/alunos', { // Use o endpoint da sua API
+        const response = await fetch('/api/alunos', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(dadosAluno),
+                'Content-Type': 'application/json'
+            }, // <--- VÍRGULA CORRIGIDA
+            body: JSON.stringify(dadosAluno)
         });
 
         const result = await response.json();
 
         if (response.ok && result.success) {
             alert("Matrícula enviada com sucesso! ID: " + result.data.id);
-            document.getElementById("formMatricula").addEventListener("submit", async function(e){
-              e.preventDefault();
+            // ---- CÓDIGO DE RESET CORRIGIDO ----
+            document.getElementById("formMatricula").reset();
             document.getElementById("pagina2").classList.add("hidden");
             document.getElementById("pagina1").classList.remove("hidden");
             document.getElementById("cursoSelecionado").innerHTML='';
-            });
+            // ---- FIM DA CORREÇÃO ----
         } else {
-            // Exibe mensagem de erro da API ou uma genérica
             alert("Erro ao enviar matrícula: " + (result.message || 'Erro desconhecido'));
             console.error("Erro da API:", result);
         }
@@ -290,7 +284,7 @@ async function buscarCEP(){
     } else {
          alert("Por favor, preencha todos os campos obrigatórios.");
     }
-  });
+});
 
 // Admin
 function abrirLoginAdmin(){
@@ -346,6 +340,7 @@ function removerCurso(idx){
 
 gerarCursos();
 lucide.createIcons();
+
 </script>
 
 </body>

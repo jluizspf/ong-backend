@@ -56,7 +56,7 @@ function App() {
 
   const checkApiHealth = async () => {
     try {
-      const response = await axios.get(`/health`);
+      const response = await axios.get(`/api/health`);
       setApiStatus('online');
       setDbStatus(response.data.database);
     } catch (error) {

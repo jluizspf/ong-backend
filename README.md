@@ -75,4 +75,85 @@ sqlite3 ong.db < seed.sql
 
 # 3d. Volte para a raiz do backend
 cd ..
+````
 
+### 2\. Frontend (Painel Admin React)
+
+```bash
+# 1. Navegue até a pasta do frontend
+cd frontend
+
+# 2. Instale as dependências do React
+npm install
+
+# 3. (Para Deploy) Crie a build de produção
+# (Isto cria a pasta /frontend/build que o Nginx utiliza)
+npm run build
+```
+
+-----
+
+## Como Rodar
+
+### Modo de Desenvolvimento
+
+Para rodar o backend e o frontend separadamente em modo de desenvolvimento:
+
+```bash
+# Terminal 1: Rodar o Backend (API)
+# (Na pasta raiz /ong-backend)
+npm run dev
+# (A API estará disponível em http://localhost:3000)
+```
+
+```bash
+# Terminal 2: Rodar o Frontend (React)
+# (Na pasta /frontend)
+npm start
+# (O painel admin abrirá em http://localhost:5000 ou outra porta)
+```
+
+### Modo de Produção (Simulando a VM)
+
+Para testar a configuração de produção (Nginx + PM2):
+
+1.  Certifique-se de que o **Nginx** esteja instalado e configurado (ver ficheiro de configuração Nginx no histórico de commits).
+2.  Certifique-se de que o **PM2** esteja instalado (`npm install pm2 -g`).
+3.  Inicie a API com PM2:
+    ```bash
+    # (Na pasta raiz /ong-backend)
+    pm2 start server.js --name ong-api
+    ```
+4.  Inicie o Nginx:
+    ```bash
+    sudo systemctl start nginx
+    ```
+
+-----
+
+## Estrutura de Roteamento (Produção)
+
+Quando hospedado na VM com Nginx, o sistema responde nos seguintes caminhos:
+
+  * `http://cidemoradia.duckdns.org/`
+      * **O que faz:** Serve o Painel de Administrador (React).
+  * `http://cidemoradia.duckdns.org/matricula`
+      * **O que faz:** Serve a página de matrícula pública (HTML Estático).
+  * `http://cidemoradia.duckdns.org/api/*`
+      * **O que faz:** Encaminha todas as chamadas de API (ex: `/api/alunos`) para o servidor Node.js/Express.
+
+-----
+
+## Autores
+
+  * **Alexandre dos Santos Abrantes**
+  * **Alexandre Xavier Dantas**
+  * **Cristian Lopes dos Santos Germano**
+  * **Dafny Caroline Freitas**
+  * **José Luiz dos Santos Pereira Filho**
+  * **Mayra Alencar Vidal**
+    
+<!-- end list -->
+
+```
+```

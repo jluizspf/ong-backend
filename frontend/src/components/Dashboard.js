@@ -1,187 +1,145 @@
+// Conteúdo para: frontend/src/components/Dashboard.js
+
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+// Importa o componente 'Pie' (pizza) e as dependências do Chart.js
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
+// Registra os componentes necessários do Chart.js
+ChartJS.register(ArcElement, Tooltip, Legend);
 
+const Dashboard = () => {
+  // --- Estados para o Status da API (você já deve ter algo parecido) ---
+  const [apiStatus, setApiStatus] = useState(false);
+  const [dbStatus, setDbStatus] = useState(false);
 
-function Dashboard() {
-  const [stats, setStats] = useState({
-    alunos: 0,
-    cursos: 0,
-    professores: 0,
-    colaboradores: 0
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // --- Novos Estados para o Gráfico ---
+  const [chartData, setChartData] = useState(null); // Guarda os dados formatados para o gráfico
+  const [error, setError] = useState(''); // Guarda mensagens de erro do gráfico
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
+  // Define as datas padrão para o filtro
+  const [dataInicio, setDataInicio] = useState('2025-01-01');
+  const [dataFim, setDataFim] = useState('2025-12-31');
 
-
-
-
-  const fetchStats = async () => {
+  // Função para verificar a saúde da API (você já deve ter esta função)
+  const checkApiHealth = async () => {
     try {
-      setLoading(true);
-      const [alunosRes, cursosRes, professoresRes, colaboradoresRes] = await Promise.all([
-        axios.get(`/api/alunos`),
-        axios.get(`/api/cursos`),
-        axios.get(`/api/professores`),
-        axios.get(`/api/colaboradores`)
-      ]);
-
-      setStats({
-        alunos: alunosRes.data.count || 0,
-        cursos: cursosRes.data.count || 0,
-        professores: professoresRes.data.count || 0,
-        colaboradores: colaboradoresRes.data.count || 0
-      });
-    } catch (err) {
-      setError('Erro ao carregar estatísticas');
-      console.error('Erro ao buscar estatísticas:', err);
-    } finally {
-      setLoading(false);
+      const response = await fetch('/health'); // Chama a rota /health do server.js
+      const data = await response.json();
+      if (data.status === 'ok') {
+        setApiStatus(true);
+        setDbStatus(data.database === 'connected');
+      } else {
+        setApiStatus(false);
+        setDbStatus(false);
+      }
+    } catch (error) {
+      console.error("Erro ao verificar saúde da API:", error);
+      setApiStatus(false);
+      setDbStatus(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="loading">
-        <h2>Carregando estatísticas...</h2>
-      </div>
-    );
-  }
+  // Função para buscar os dados das estatísticas do gráfico
+  const fetchChartData = async () => {
+    try {
+      // Chama a nova rota da API que criámos
+      const response = await fetch(`/api/cursos/stats/matriculas-por-curso?data_inicio=${dataInicio}&data_fim=${dataFim}`);
+      const result = await response.json();
 
-  if (error) {
-    return (
-      <div className="alert alert-error">
-        <h3>Erro</h3>
-        <p>{error}</p>
-        <button className="btn btn-primary" onClick={fetchStats}>
-          Tentar Novamente
-        </button>
-      </div>
-    );
-  }
+      if (result.success && result.data.length > 0) {
+        // Formata os dados recebidos da API para o formato que o Chart.js espera
+        const labels = result.data.map(item => item.nome_curso);
+        const data = result.data.map(item => item.quantidade_matriculas);
 
-  const statCards = [
-    {
-      title: 'Alunos',
-      value: stats.alunos,
-      icon: '👨‍🎓',
-      color: '#4CAF50',
-      description: 'Total de alunos cadastrados'
-    },
-    {
-      title: 'Cursos',
-      value: stats.cursos,
-      icon: '📚',
-      color: '#2196F3',
-      description: 'Total de cursos disponíveis'
-    },
-    {
-      title: 'Professores',
-      value: stats.professores,
-      icon: '👨‍🏫',
-      color: '#FF9800',
-      description: 'Total de professores ativos'
-    },
-    {
-      title: 'Colaboradores',
-      value: stats.colaboradores,
-      icon: '👥',
-      color: '#9C27B0',
-      description: 'Total de colaboradores'
+        setChartData({
+          labels: labels,
+          datasets: [
+            {
+              label: 'Matrículas',
+              data: data,
+              backgroundColor: [ // Cores para as fatias da pizza
+                'rgba(255, 99, 132, 0.7)',
+                'rgba(54, 162, 235, 0.7)',
+                'rgba(255, 206, 86, 0.7)',
+                'rgba(75, 192, 192, 0.7)',
+                'rgba(153, 102, 255, 0.7)',
+                'rgba(255, 159, 64, 0.7)',
+              ],
+              borderColor: 'rgba(255, 255, 255, 1)',
+              borderWidth: 1,
+            },
+          ],
+        });
+        setError('');
+      } else {
+        setChartData(null); // Limpa o gráfico se não houver dados
+        setError('Nenhum dado encontrado para este período.');
+      }
+    } catch (err) {
+      setError('Erro ao buscar dados do gráfico.');
+      console.error(err);
     }
-  ];
+  };
+
+  // useEffect para buscar os dados quando o componente carregar
+  useEffect(() => {
+    checkApiHealth(); // Verifica a saúde da API
+    fetchChartData(); // Busca os dados do gráfico
+  }, [dataInicio, dataFim]); // Dependências: refaz a busca se as datas mudarem
 
   return (
-    <div>
-      <div className="card">
-        <div className="card-header">
-          <h2 className="card-title">📊 Dashboard - Visão Geral</h2>
-          <button className="btn btn-primary" onClick={fetchStats}>
-            🔄 Atualizar
-          </button>
-        </div>
-        
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-          gap: '1.5rem',
-          marginTop: '1rem'
-        }}>
-          {statCards.map((stat, index) => (
-            <div 
-              key={index}
-              className="card"
-              style={{ 
-                borderLeft: `4px solid ${stat.color}`,
-                background: 'linear-gradient(135deg, #fff 0%, #f8f9fa 100%)'
-              }}
-            >
-              <div className="d-flex justify-between align-center">
-                <div>
-                  <h3 style={{ color: stat.color, marginBottom: '0.5rem' }}>
-                    {stat.icon} {stat.title}
-                  </h3>
-                  <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#333' }}>
-                    {stat.value}
-                  </div>
-                  <p style={{ color: '#666', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-                    {stat.description}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <div className="dashboard-container">
+        <h2>Dashboard</h2>
 
-      <div className="card">
-        <h3 className="card-title">🚀 Sistema de Gestão da ONG</h3>
-        <p style={{ marginBottom: '1rem', color: '#666' }}>
-          Bem-vindo ao sistema completo de gestão educacional da ONG. 
-          Aqui você pode gerenciar todos os aspectos da organização.
-        </p>
-        
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-          gap: '1rem',
-          marginTop: '1.5rem'
-        }}>
-          <div style={{ padding: '1rem', background: '#f8f9fa', borderRadius: '6px' }}>
-            <h4 style={{ color: '#4CAF50', marginBottom: '0.5rem' }}>👨‍🎓 Alunos</h4>
-            <p style={{ fontSize: '0.9rem', color: '#666' }}>
-              Cadastre e gerencie informações dos alunos, incluindo escolaridade e renda familiar.
-            </p>
+        {/* Indicador de Status */}
+        <div className="status-indicator">
+          <span>API: {apiStatus ? '🟢 Online' : '🔴 Offline'}</span>
+          <span> | </span>
+          <span>DB: {dbStatus ? '🟢 Conectado' : '🔴 Desconectado'}</span>
+        </div>
+
+        <p>Sistema completo para gerenciar alunos, cursos, professores e colaboradores.</p>
+
+        <hr style={{ margin: '20px 0' }} />
+
+        {/* --- Secção do Gráfico --- */}
+        <div className="grafico-container" style={{ maxWidth: '450px', margin: 'auto', padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
+          <h3>Matrículas por Curso</h3>
+
+          {/* Inputs de Data */}
+          <div style={{ marginBottom: '15px', display: 'flex', justifyContent: 'space-around', gap: '10px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '14px' }}>De: </label>
+              <input
+                  type="date"
+                  value={dataInicio}
+                  onChange={(e) => setDataInicio(e.target.value)}
+                  style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '14px' }}>Até: </label>
+              <input
+                  type="date"
+                  value={dataFim}
+                  onChange={(e) => setDataFim(e.target.value)}
+                  style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
+              />
+            </div>
           </div>
-          
-          <div style={{ padding: '1rem', background: '#f8f9fa', borderRadius: '6px' }}>
-            <h4 style={{ color: '#2196F3', marginBottom: '0.5rem' }}>📚 Cursos</h4>
-            <p style={{ fontSize: '0.9rem', color: '#666' }}>
-              Crie e gerencie cursos, controle vagas e horários disponíveis.
-            </p>
-          </div>
-          
-          <div style={{ padding: '1rem', background: '#f8f9fa', borderRadius: '6px' }}>
-            <h4 style={{ color: '#FF9800', marginBottom: '0.5rem' }}>👨‍🏫 Professores</h4>
-            <p style={{ fontSize: '0.9rem', color: '#666' }}>
-              Gerencie o corpo docente e suas atribuições aos cursos.
-            </p>
-          </div>
-          
-          <div style={{ padding: '1rem', background: '#f8f9fa', borderRadius: '6px' }}>
-            <h4 style={{ color: '#9C27B0', marginBottom: '0.5rem' }}>👥 Colaboradores</h4>
-            <p style={{ fontSize: '0.9rem', color: '#666' }}>
-              Administre a equipe de colaboradores e suas responsabilidades.
-            </p>
-          </div>
+
+          {/* O Gráfico em Pizza */}
+          {chartData ? (
+              <Pie data={chartData} />
+          ) : (
+              <p style={{ textAlign: 'center', color: '#777' }}>
+                {error || 'Carregando gráfico...'}
+              </p>
+          )}
         </div>
       </div>
-    </div>
   );
-}
+};
 
 export default Dashboard;

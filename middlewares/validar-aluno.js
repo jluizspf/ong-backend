@@ -1,9 +1,9 @@
 // middlewares/validar-aluno.js
 module.exports = function validarAluno(req, res, next) {
-  const { nome, cpf } = req.body || {};
+  const { Nome, CPF } = req.body || {};
 
   // Verifica presença básica
-  if (!nome || !cpf) {
+  if (!Nome || !CPF) {
     return res.status(400).json({
       success: false,
       message: 'Campos obrigatórios ausentes: nome e cpf'
@@ -11,7 +11,7 @@ module.exports = function validarAluno(req, res, next) {
   }
 
   // Normaliza CPF: remove tudo que não é dígito
-  const cpfDigits = String(cpf).replace(/\D/g, '');
+  const cpfDigits = String(CPF).replace(/\D/g, '');
 
   // Verifica comprimento (11 dígitos)
   if (cpfDigits.length !== 11) {
@@ -22,6 +22,6 @@ module.exports = function validarAluno(req, res, next) {
   }
 
   // Substitui no body pelo formato normalizado
-  req.body.cpf = cpfDigits;
+  req.body.CPF = cpfDigits;
   next();
 };

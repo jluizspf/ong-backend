@@ -1,142 +1,51 @@
-const { executeQuery } = require('../config/database-sqlite');
+// Importa a conexão 'db' do ficheiro de configuração
+const { db } = require('../config/database-sqlite.js');
 
+/**
+ * Classe Modelo para a entidade Curso.
+ * Contém métodos estáticos para interagir com a tabela Curso.
+ */
 class Curso {
-    // Buscar todos os cursos
-    static async getAll() {
-        const sql = `
-            SELECT c.*, 
-                   COUNT(i.ID_Aluno) as Alunos_Inscritos,
-                   p.Nome as Nome_Professor
-            FROM Curso c
-            LEFT JOIN Inscricao i ON c.ID_Curso = i.ID_Curso AND i.Status = 'Ativa'
-            LEFT JOIN Ministracao m ON c.ID_Curso = m.ID_Curso AND m.Status = 'Ativo'
-            LEFT JOIN Professor p ON m.ID_Prof = p.ID_Prof
-            GROUP BY c.ID_Curso
-            ORDER BY c.Nome
-        `;
-        return await executeQuery(sql);
-    }
 
-    // Buscar curso por ID
-    static async getById(id) {
-        const sql = `
-            SELECT c.*, 
-                   COUNT(i.ID_Aluno) as Alunos_Inscritos,
-                   p.Nome as Nome_Professor
-            FROM Curso c
-            LEFT JOIN Inscricao i ON c.ID_Curso = i.ID_Curso AND i.Status = 'Ativa'
-            LEFT JOIN Ministracao m ON c.ID_Curso = m.ID_Curso AND m.Status = 'Ativo'
-            LEFT JOIN Professor p ON m.ID_Prof = p.ID_Prof
-            WHERE c.ID_Curso = ?
-            GROUP BY c.ID_Curso
-        `;
-        const result = await executeQuery(sql, [id]);
-        return result[0] || null;
-    }
+    // (Pode adicionar outros métodos aqui, como findAll, findById, create...)
 
-    // Criar novo curso
-    static async create(cursoData) {
-        const { Nome, Qtd_Vagas, Per_Duracao, Local, Prof_Responsavel, Horario, Colaborador_Resp } = cursoData;
-        
-        const sql = `
-            INSERT INTO Curso (Nome, Qtd_Vagas, Per_Duracao, Local, Prof_Responsavel, Horario, Colaborador_Resp)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `;
-        
-        const result = await executeQuery(sql, [
-            Nome, Qtd_Vagas, Per_Duracao, Local, Prof_Responsavel, Horario, Colaborador_Resp
-        ]);
-        
-        return result.insertId;
-    }
+    /**
+     * Obtém a contagem de matrículas (Inscricao) por curso dentro de um período.
+     * Esta é a função que o IntelliJ estava a sentir falta.
+     * * @param {string} dataInicio Formato 'YYYY-MM-DD'
+     * @param {string} dataFim Formato 'YYYY-MM-DD'
+     * @returns {Promise<Array>} Uma lista de objetos (ex: [{ nome_curso: 'Inglês', quantidade_matriculas: 10 }])
+     */
+    static async getMatriculasPorPeriodo(dataInicio, dataFim) {
 
-    // Atualizar curso
-    static async update(id, cursoData) {
-        const { Nome, Qtd_Vagas, Per_Duracao, Local, Prof_Responsavel, Horario, Verificado, Colaborador_Resp } = cursoData;
-        
+        // Conceito-chave: Este SQL usa JOIN para "juntar" as tabelas
+        // Inscricao e Curso, e GROUP BY para "agrupar" os resultados.
         const sql = `
-            UPDATE Curso 
-            SET Nome = ?, Qtd_Vagas = ?, Per_Duracao = ?, Local = ?, 
-                Prof_Responsavel = ?, Horario = ?, Verificado = ?, Colaborador_Resp = ?
-            WHERE ID_Curso = ?
+            SELECT
+                C.Nome AS nome_curso,
+                COUNT(I.ID_Inscricao) AS quantidade_matriculas
+            FROM
+                Inscricao AS I
+            JOIN
+                Curso AS C ON I.ID_Curso = C.ID_Curso
+            WHERE
+                I.Data_Inscricao BETWEEN ? AND ?
+            GROUP BY
+                C.Nome
+            ORDER BY
+                quantidade_matriculas DESC
         `;
-        
-        const result = await executeQuery(sql, [
-            Nome, Qtd_Vagas, Per_Duracao, Local, Prof_Responsavel, Horario, 
-            Verificado, Colaborador_Resp, id
-        ]);
-        
-        return result.affectedRows > 0;
-    }
 
-    // Deletar curso
-    static async delete(id) {
-        const sql = 'DELETE FROM Curso WHERE ID_Curso = ?';
-        const result = await executeQuery(sql, [id]);
-        return result.affectedRows > 0;
-    }
-
-    // Buscar cursos verificados
-    static async getVerificados() {
-        const sql = `
-            SELECT c.*, 
-                   COUNT(i.ID_Aluno) as Alunos_Inscritos,
-                   p.Nome as Nome_Professor
-            FROM Curso c
-            LEFT JOIN Inscricao i ON c.ID_Curso = i.ID_Curso AND i.Status = 'Ativa'
-            LEFT JOIN Ministracao m ON c.ID_Curso = m.ID_Curso AND m.Status = 'Ativo'
-            LEFT JOIN Professor p ON m.ID_Prof = p.ID_Prof
-            WHERE c.Verificado = TRUE
-            GROUP BY c.ID_Curso
-            ORDER BY c.Nome
-        `;
-        return await executeQuery(sql);
-    }
-
-    // Verificar curso
-    static async verificar(id, colaboradorId) {
-        const sql = `
-            UPDATE Curso 
-            SET Verificado = TRUE, Colaborador_Resp = (SELECT Nome FROM Colaborador WHERE ID_Colab = ?)
-            WHERE ID_Curso = ?
-        `;
-        
-        const result = await executeQuery(sql, [colaboradorId, id]);
-        
-        // Registrar verificação
-        if (result.affectedRows > 0) {
-            const verifSql = `
-                INSERT INTO Verificacao_Curso (ID_Colab, ID_Curso, Status)
-                VALUES (?, ?, 'Aprovado')
-            `;
-            await executeQuery(verifSql, [colaboradorId, id]);
+        try {
+            // O db.all() executa a consulta e retorna todas as linhas
+            const rows = await db.all(sql, [dataInicio, dataFim]);
+            return rows;
+        } catch (err) {
+            console.error(err.message);
+            throw new Error('Erro ao consultar estatísticas no banco de dados');
         }
-        
-        return result.affectedRows > 0;
-    }
-
-    // Inscrever aluno no curso
-    static async inscreverAluno(alunoId, cursoId) {
-        const sql = `
-            INSERT INTO Inscricao (ID_Aluno, ID_Curso)
-            VALUES (?, ?)
-        `;
-        
-        const result = await executeQuery(sql, [alunoId, cursoId]);
-        return result.insertId;
-    }
-
-    // Cancelar inscrição
-    static async cancelarInscricao(alunoId, cursoId) {
-        const sql = `
-            UPDATE Inscricao 
-            SET Status = 'Cancelada'
-            WHERE ID_Aluno = ? AND ID_Curso = ?
-        `;
-        
-        const result = await executeQuery(sql, [alunoId, cursoId]);
-        return result.affectedRows > 0;
     }
 }
 
+// Exporta a classe para que o 'routes/cursos.js' possa importá-la
 module.exports = Curso;

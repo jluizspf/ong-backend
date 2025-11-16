@@ -1,7 +1,34 @@
 const express = require('express');
 const router = express.Router();
 const Curso = require('../models/Curso');
+const { handleError } = require('./utils');
 const { serializeBigInt } = require('./utils');
+
+
+// Dentro de routes/cursos.js, adicione esta nova rota:
+// (Não se esqueça de importar o 'handleError' e o 'Curso' no topo do ficheiro)
+
+router.get('/stats/matriculas-por-curso', async (req, res) => {
+    try {
+        const { data_inicio, data_fim } = req.query; // Ex: ?data_inicio=2025-01-01&data_fim=2025-12-31
+
+        if (!data_inicio || !data_fim) {
+            return res.status(400).json({
+                success: false,
+                message: "Datas de início e fim são obrigatórias."
+            });
+        }
+
+        // 3. Chamar a nova função no Model (que vamos criar a seguir)
+        const stats = await Curso.getMatriculasPorPeriodo(data_inicio, data_fim);
+
+        res.json({ success: true, data: stats });
+
+    } catch (error) {
+        handleError(res, error, 'Erro ao buscar estatísticas de matrículas');
+    }
+});
+
 
 // GET /api/cursos - Buscar todos os cursos
 router.get('/', async (req, res) => {

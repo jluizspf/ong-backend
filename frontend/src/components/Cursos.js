@@ -34,14 +34,23 @@ function Cursos() {
       setLoading(true);
       const response = await axios.get(`/api/cursos`);
       
-      // O '.data.data' garante que o React pegue apenas a lista, e o '|| []' garante que não quebre se vier vazio
-      setCursos(response.data.data || []); 
+      // Adicionamos este log para você ver no 'F12 > Console' exatamente o que o banco devolveu
+      console.log("Dados recebidos da API:", response.data);
       
+      // Blindagem: Garante que só vai pro estado se for realmente uma lista (Array)
+      let listaSegura = [];
+      if (Array.isArray(response.data)) {
+          listaSegura = response.data;
+      } else if (response.data && Array.isArray(response.data.data)) {
+          listaSegura = response.data.data;
+      }
+
+      setCursos(listaSegura);
+ 
     } catch (err) {
       setError('Erro ao carregar cursos');
       console.error('Erro ao buscar cursos:', err);
     } finally {
-      // O finally garante que a tela destrave do "Carregando..."
       setLoading(false); 
     }
   };

@@ -34,11 +34,14 @@ router.get('/stats/matriculas-por-curso', async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         const cursos = await Curso.getAll();
-        res.json(serializeBigInt({
+        
+        // Removemos o serializeBigInt daqui!
+        res.json({
             success: true,
             data: cursos,
             count: cursos.length
-        }));
+        });
+        
     } catch (error) {
         console.error('Erro ao buscar cursos:', error);
         res.status(500).json({

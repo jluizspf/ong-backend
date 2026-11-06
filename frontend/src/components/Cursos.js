@@ -28,15 +28,23 @@ function Cursos() {
     fetchCursos();
   }, []);
 
-const fetchCursos = async () => {
-  try {
-    const response = await axios.get('/api/cursos');
-    // O ajuste está aqui: response.data.data pega o array real retornado pelo backend
-    setCursos(response.data.data || []); 
-  } catch (err) {
-    console.error('Erro ao buscar cursos:', err);
-  }
-};
+// Função para buscar lista de cursos da API
+  const fetchCursos = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`/api/cursos`);
+      
+      // O '.data.data' garante que o React pegue apenas a lista, e o '|| []' garante que não quebre se vier vazio
+      setCursos(response.data.data || []); 
+      
+    } catch (err) {
+      setError('Erro ao carregar cursos');
+      console.error('Erro ao buscar cursos:', err);
+    } finally {
+      // O finally garante que a tela destrave do "Carregando..."
+      setLoading(false); 
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

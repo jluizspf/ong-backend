@@ -28,18 +28,15 @@ function Cursos() {
     fetchCursos();
   }, []);
 
-  const fetchCursos = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`/api/cursos`);
-      setCursos(response.data.data || []);
-    } catch (err) {
-      setError('Erro ao carregar cursos');
-      console.error('Erro ao buscar cursos:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchCursos = async () => {
+  try {
+    const response = await axios.get('/api/cursos');
+    // O ajuste está aqui: response.data.data pega o array real retornado pelo backend
+    setCursos(response.data.data || []); 
+  } catch (err) {
+    console.error('Erro ao buscar cursos:', err);
+  }
+};
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

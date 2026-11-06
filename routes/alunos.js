@@ -56,8 +56,12 @@ router.get('/:id', async (req, res) => {
 router.post('/', validarAluno, async (req, res) => {
   try {
     // aqui req.body.cpf já tem 11 dígitos
-    const novoAluno = await inserirAlunoNoDB(req.body); // sua função existente
-    res.status(201).json({ success: true, data: novoAluno });
+    const novoAluno = await Aluno.create(req.body); 
+    
+    res.status(201).json(serializeBigInt({ 
+        success: true, 
+        data: novoAluno 
+    }));
   } catch (err) {
     console.error('Erro ao inserir aluno:', err);
     res.status(500).json({ success: false, message: 'Erro interno ao criar aluno' });

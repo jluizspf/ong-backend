@@ -14,7 +14,7 @@ import Dashboard from './components/Dashboard';
 
 
 // Configuração do axios
-
+axios.defaults.baseURL = 'https://ominous-space-funicular-5jrg5jj7pw4cvwvp-3000.app.github.dev';
 
 function Navigation() {
   const location = useLocation();

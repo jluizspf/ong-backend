@@ -7,19 +7,50 @@ const { db } = require('../config/database-sqlite.js');
  */
 class Curso {
 
-    // (Pode adicionar outros métodos aqui, como findAll, findById, create...)
+    // --- MÉTODOS CRUD BÁSICOS ---
+
+    // Busca todos os cursos
+    static async getAll() {
+        const sql = 'SELECT * FROM Curso';
+        return await db.all(sql);
+    }
+
+    // Busca um curso específico pelo ID
+    static async getById(id) {
+        const sql = 'SELECT * FROM Curso WHERE ID_Curso = ?';
+        return await db.get(sql, [id]);
+    }
+
+    // Cria um novo curso
+    static async create(cursoData) {
+        const sql = 'INSERT INTO Curso (Nome, Qtd_Vagas) VALUES (?, ?)';
+        const result = await db.run(sql, [cursoData.Nome, cursoData.Qtd_Vagas]);
+        return result.lastID; // Retorna o ID gerado pelo banco
+    }
+
+    // Atualiza um curso existente
+    static async update(id, cursoData) {
+        const sql = 'UPDATE Curso SET Nome = ?, Qtd_Vagas = ? WHERE ID_Curso = ?';
+        const result = await db.run(sql, [cursoData.Nome, cursoData.Qtd_Vagas, id]);
+        return result.changes > 0; // Retorna true se alterou alguma linha
+    }
+
+    // Deleta um curso
+    static async delete(id) {
+        const sql = 'DELETE FROM Curso WHERE ID_Curso = ?';
+        const result = await db.run(sql, [id]);
+        return result.changes > 0;
+    }
+
+    // --- MÉTODOS ESPECÍFICOS ---
 
     /**
      * Obtém a contagem de matrículas (Inscricao) por curso dentro de um período.
-     * Esta é a função que o IntelliJ estava a sentir falta.
-     * * @param {string} dataInicio Formato 'YYYY-MM-DD'
+     * @param {string} dataInicio Formato 'YYYY-MM-DD'
      * @param {string} dataFim Formato 'YYYY-MM-DD'
-     * @returns {Promise<Array>} Uma lista de objetos (ex: [{ nome_curso: 'Inglês', quantidade_matriculas: 10 }])
+     * @returns {Promise<Array>}
      */
     static async getMatriculasPorPeriodo(dataInicio, dataFim) {
-
-        // Conceito-chave: Este SQL usa JOIN para "juntar" as tabelas
-        // Inscricao e Curso, e GROUP BY para "agrupar" os resultados.
         const sql = `
             SELECT
                 C.Nome AS nome_curso,
@@ -35,11 +66,8 @@ class Curso {
             ORDER BY
                 quantidade_matriculas DESC
         `;
-
         try {
-            // O db.all() executa a consulta e retorna todas as linhas
-            const rows = await db.all(sql, [dataInicio, dataFim]);
-            return rows;
+            return await db.all(sql, [dataInicio, dataFim]);
         } catch (err) {
             console.error(err.message);
             throw new Error('Erro ao consultar estatísticas no banco de dados');
@@ -47,5 +75,4 @@ class Curso {
     }
 }
 
-// Exporta a classe para que o 'routes/cursos.js' possa importá-la
 module.exports = Curso;
